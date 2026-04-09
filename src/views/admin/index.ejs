@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理后台 - 校园二手交易平台</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #7C3AED;
+      --primary-hover: #6D28D9;
+      --secondary: #A78BFA;
+      --cta: #F97316;
+      --bg: #FAF5FF;
+      --text: #4C1D95;
+      --text-muted: #7C3AED80;
+      --border: #E9D5FF;
+      --glass-bg: rgba(255, 255, 255, 0.9);
+      --glass-border: rgba(255, 255, 255, 0.5);
+      --card-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.1), 0 2px 4px -1px rgba(124, 58, 237, 0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Fira Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 50%, #FAF5FF 100%);
+      min-height: 100vh;
+    }
+    .navbar {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(124, 58, 237, 0.1);
+    }
+    .navbar-brand {
+      font-family: 'Fira Code', monospace;
+      font-weight: 600;
+      color: var(--primary) !important;
+    }
+    .admin-sidebar {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border);
+      min-height: calc(100vh - 56px);
+      padding: 24px 0;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+    }
+    .sidebar-link:hover, .sidebar-link.active {
+      background: rgba(124, 58, 237, 0.08);
+      color: var(--primary);
+      border-left-color: var(--primary);
+    }
+    .sidebar-link svg {
+      width: 20px;
+      height: 20px;
+    }
+    .stat-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--card-shadow);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.15);
+    }
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .stat-icon svg {
+      width: 24px;
+      height: 24px;
+      color: white;
+    }
+    .stat-value {
+      font-family: 'Fira Code', monospace;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .content-header {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .content-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .content-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .action-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 24px;
+      box-shadow: var(--card-shadow);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+    }
+    .action-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.15);
+      border-color: var(--primary);
+    }
+    .action-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    }
+    .action-icon svg {
+      width: 28px;
+      height: 28px;
+      color: white;
+    }
+    .action-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .action-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary) 100%);
+      transform: translateY(-1px);
+    }
+    .btn-outline-primary {
+      color: var(--primary);
+      border-color: var(--primary);
+      border-radius: 10px;
+    }
+    .btn-outline-primary:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .user-info {
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+    }
+    @media (max-width: 768px) {
+      .admin-sidebar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+        </svg>
+        校园二手交易平台
+      </a>
+      <div class="d-flex align-items-center gap-3">
+        <span class="user-info text-white">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+          </svg>
+          <%= user.nickname %>
+        </span>
+        <a href="/logout" class="btn btn-outline-primary btn-sm">退出</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-3 col-lg-2 d-md-block admin-sidebar collapse">
+        <div class="position-sticky pt-3">
+          <a href="/admin" class="sidebar-link active">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+            首页
+          </a>
+          <a href="/admin/users" class="sidebar-link">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+            用户管理
+          </a>
+          <a href="/admin/products" class="sidebar-link">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+            商品管理
+          </a>
+          <a href="/admin/orders" class="sidebar-link">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+            </svg>
+            订单管理
+          </a>
+        </div>
+      </nav>
+
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div class="content-header d-flex justify-content-between align-items-center">
+          <div>
+            <h1 class="content-title">管理后台</h1>
+            <p class="content-subtitle">欢迎回来，<%= user.nickname %></p>
+          </div>
+          <button class="navbar-toggler d-md-none" type="button" data-bs-toggle="collapse" data-bs-target=".admin-sidebar">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </div>
+
+        <div class="row g-4 mb-4">
+          <div class="col-12 col-md-6">
+            <div class="stat-card">
+              <div class="stat-icon" style="background: linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%);">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+              </div>
+              <div class="stat-value"><%= stats.userCount %></div>
+              <div class="stat-label">注册用户</div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="stat-card">
+              <div class="stat-icon" style="background: linear-gradient(135deg, #F97316 0%, #FB923C 100%);">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+              </div>
+              <div class="stat-value"><%= stats.productCount %></div>
+              <div class="stat-label">在售商品</div>
+            </div>
+          </div>
+        </div>
+
+        <h5 class="fw-bold text mb-3" style="color: var(--text);">快捷操作</h5>
+        <div class="row g-4">
+          <div class="col-12 col-md-6 col-lg-4">
+            <a href="/admin/users" class="action-card">
+              <div class="action-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                </svg>
+              </div>
+              <h3 class="action-title">用户管理</h3>
+              <p class="action-desc">查看和管理注册用户信息</p>
+            </a>
+          </div>
+          <div class="col-12 col-md-6 col-lg-4">
+            <a href="/admin/products" class="action-card">
+              <div class="action-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+              </div>
+              <h3 class="action-title">商品管理</h3>
+              <p class="action-desc">管理所有发布的商品</p>
+            </a>
+          </div>
+          <div class="col-12 col-md-6 col-lg-4">
+            <a href="/admin/orders" class="action-card">
+              <div class="action-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+              </div>
+              <h3 class="action-title">订单管理</h3>
+              <p class="action-desc">查看和处理所有订单</p>
+            </a>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
