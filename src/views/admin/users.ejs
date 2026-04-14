@@ -325,7 +325,7 @@
               <td><%= u.nickname %></td>
               <td><%= new Date(u.created_at).toLocaleString('zh-CN') %></td>
               <td>
-                <form action='/admin/users/delete/<%= u.id %>' method='POST' style='display: inline;' onsubmit='return confirm(&quot;确定要删除该用户吗？&quot;);'>
+                <form action='/admin/users/delete/<%= u.id %>' method='POST' style='display: inline;' onsubmit='return confirm("确定要删除该用户吗？");'>
                   <button type='submit' class='btn-delete'>删除</button>
                 </form>
               </td>
