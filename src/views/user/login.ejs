@@ -4,266 +4,286 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>登录 - 校园二手交易平台</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary: #2563EB;
-      --primary-hover: #1D4ED8;
-      --secondary: #3B82F6;
-      --bg: #F8FAFC;
-      --text: #1E293B;
-      --text-muted: #64748B;
-      --border: #E2E8F0;
-      --glass-bg: rgba(255, 255, 255, 0.85);
-      --glass-border: rgba(255, 255, 255, 0.5);
+    @font-face {
+      font-family: 'KaiTi';
+      src: local('KaiTi'), local('STKaiti'), local('SimKai'), local('楷体');
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #1B5E20;
+      --primary-dark: #144518;
+      --secondary: #F5F5DC;
+      --accent: #8B4513;
+      --text: #3E2723;
+      --text-muted: #5D4037;
+      --border: #8D6E63;
+      --bg: #FFF8E1;
+      --bg-paper: #FFFEF5;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 50%, #F1F5F9 100%);
+      font-family: "KaiTi", "楷体", STKaiti, SimKai, serif;
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(90deg, transparent 95%, rgba(139, 69, 19, 0.03) 95%),
+        linear-gradient(transparent 95%, rgba(139, 69, 19, 0.03) 95%);
+      background-size: 20px 20px;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
-      position: relative;
-      overflow: hidden;
+      color: var(--text);
     }
-    body::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle at 30% 30%, rgba(37, 99, 235, 0.08) 0%, transparent 50%),
-                  radial-gradient(circle at 70% 70%, rgba(59, 130, 246, 0.06) 0%, transparent 50%);
-      animation: float 20s ease-in-out infinite;
-    }
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0) rotate(0deg); }
-      50% { transform: translate(-2%, -2%) rotate(1deg); }
+    .auth-container {
+      width: 100%;
+      max-width: 380px;
     }
     .auth-card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08),
-                  0 0 0 1px rgba(255, 255, 255, 0.5) inset;
-      padding: 48px 40px;
-      max-width: 420px;
-      width: 100%;
+      background: var(--bg-paper);
+      border: 3px double var(--border);
+      border-radius: 8px;
+      padding: 40px 36px;
+      box-shadow: 4px 4px 0 rgba(62, 39, 35, 0.15);
+      position: relative;
+    }
+    .auth-card::before {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      border: 1px dashed var(--border);
+      border-radius: 4px;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+    .auth-header {
+      text-align: center;
+      margin-bottom: 32px;
+      position: relative;
+    }
+    .auth-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--primary);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      border: 2px solid var(--primary-dark);
+    }
+    .auth-icon svg {
+      width: 28px;
+      height: 28px;
+      color: var(--secondary);
+    }
+    .auth-title {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--primary);
+      margin-bottom: 8px;
+      letter-spacing: 4px;
+    }
+    .auth-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .form-group {
+      margin-bottom: 20px;
       position: relative;
       z-index: 1;
     }
-    .auth-logo {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-    .auth-logo-icon {
-      width: 64px;
-      height: 64px;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-      border-radius: 16px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 16px;
-      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
-    }
-    .auth-logo-icon svg {
-      width: 32px;
-      height: 32px;
-      color: white;
-    }
-    .auth-title {
-      text-align: center;
-      margin-bottom: 8px;
-      color: var(--text);
-      font-size: 24px;
-      font-weight: 700;
-    }
-    .auth-subtitle {
-      text-align: center;
-      color: var(--text-muted);
+    .form-label {
+      display: block;
       font-size: 14px;
-      margin-bottom: 32px;
+      font-weight: bold;
+      color: var(--text);
+      margin-bottom: 8px;
     }
-    .form-floating {
-      margin-bottom: 20px;
-    }
-    .form-floating > .form-control, .form-floating > .form-select {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 16px;
-      height: 56px;
+    .form-input {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px;
+      font-family: inherit;
       font-size: 15px;
-      background: rgba(255, 255, 255, 0.8);
-      transition: all 0.2s ease;
+      color: var(--text);
+      background: #FFF;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      outline: none;
+      transition: all 0.2s;
     }
-    .form-floating > label {
+    .form-input::placeholder {
+      color: #A1887F;
+    }
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .checkbox-group input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+    }
+    .checkbox-group label {
+      font-size: 14px;
       color: var(--text-muted);
-      padding: 16px;
-    }
-    .form-floating > .form-control:focus, .form-floating > .form-select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-      background: #fff;
-    }
-    .form-check-input:checked {
-      background-color: var(--primary);
-      border-color: var(--primary);
-    }
-    .form-check-input:focus {
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+      cursor: pointer;
     }
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-      border: none;
-      border-radius: 12px;
-      padding: 16px 24px;
+      width: 100%;
+      height: 46px;
+      font-family: inherit;
       font-size: 16px;
-      font-weight: 600;
-      height: 52px;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+      font-weight: bold;
+      color: var(--secondary);
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border: 2px solid var(--primary-dark);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 2px;
+      position: relative;
+      z-index: 1;
     }
     .btn-primary:hover {
-      background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary) 100%);
+      background: linear-gradient(180deg, #1E6E22 0%, var(--primary) 100%);
       transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+      box-shadow: 0 4px 8px rgba(27, 94, 32, 0.3);
     }
     .btn-primary:active {
       transform: translateY(0);
     }
-    .auth-link {
+    .auth-footer {
       text-align: center;
       margin-top: 24px;
-      color: var(--text-muted);
+      padding-top: 20px;
+      border-top: 1px dashed var(--border);
+      position: relative;
+      z-index: 1;
+    }
+    .auth-footer p {
       font-size: 14px;
+      color: var(--text-muted);
     }
-    .auth-link a {
-      color: var(--primary);
+    .auth-footer a {
+      color: var(--accent);
       text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s ease;
+      font-weight: bold;
+      transition: color 0.2s;
     }
-    .auth-link a:hover {
-      color: var(--primary-hover);
+    .auth-footer a:hover {
+      color: var(--primary);
       text-decoration: underline;
     }
     .alert-error {
-      background: rgba(239, 68, 68, 0.08);
-      border: 1px solid rgba(239, 68, 68, 0.2);
-      color: #DC2626;
-      border-radius: 12px;
-      padding: 14px 16px;
-      margin-bottom: 24px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      background: #FFEBEE;
+      border: 1px solid #EF9A9A;
+      border-radius: 4px;
+      color: #C62828;
       font-size: 14px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
     }
     .alert-error svg {
+      width: 18px;
+      height: 18px;
       flex-shrink: 0;
     }
-    .form-check {
-      padding-left: 28px;
-    }
-    .form-check-label {
-      color: var(--text-muted);
-      font-size: 14px;
-      user-select: none;
-    }
-    @media (max-width: 480px) {
+    @media (max-width: 420px) {
       .auth-card {
         padding: 32px 24px;
       }
       .auth-title {
-        font-size: 20px;
+        font-size: 24px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="auth-card">
-    <div class="auth-logo">
-      <div class="auth-logo-icon">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-        </svg>
-      </div>
-      <h1 class="auth-title">欢迎回来</h1>
-      <p class="auth-subtitle">登录您的校园二手交易账号</p>
-    </div>
-    
-    <% if (error) { %>
-    <div class="alert-error">
-      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-      </svg>
-      <span><%= error %></span>
-    </div>
-    <% } %>
-    
-    <form id="loginForm" method="POST" action="/login">
-      <div class="form-floating">
-        <input type="tel" class="form-control" id="phone" name="phone" 
-               placeholder="手机号" value="<%= phone || '' %>" maxlength="11" pattern="\d{1,11}" required>
-        <label for="phone">手机号</label>
-      </div>
-      
-      <div class="form-floating">
-        <input type="password" class="form-control" id="password" name="password" 
-               placeholder="密码" minlength="1" maxlength="11" required>
-        <label for="password">密码</label>
-      </div>
-      
-      <div class="form-check d-flex justify-content-between align-items-center">
-        <div>
-          <input type="checkbox" class="form-check-input" id="remember" name="remember">
-          <label class="form-check-label" for="remember">记住密码</label>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          </svg>
         </div>
+        <h1 class="auth-title">登录</h1>
+        <p class="auth-subtitle">校园二手交易平台</p>
       </div>
-      
-      <button type="submit" class="btn btn-primary w-100 mt-4">登录</button>
-    </form>
-    
-    <div class="auth-link">
-      还没有账号？<a href="/register">立即注册</a>
+
+      <% if (error) { %>
+      <div class="alert-error">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span><%= error %></span>
+      </div>
+      <% } %>
+
+      <form id="loginForm" method="POST" action="/login">
+        <div class="form-group">
+          <label class="form-label" for="phone">手机号</label>
+          <input type="tel" class="form-input" id="phone" name="phone"
+                 placeholder="请输入手机号" value="<%= phone || '' %>" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">密码</label>
+          <input type="password" class="form-input" id="password" name="password"
+                 placeholder="请输入密码" required>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="remember" name="remember">
+          <label for="remember">记住账号</label>
+        </div>
+
+        <button type="submit" class="btn-primary">登 录</button>
+      </form>
+
+      <div class="auth-footer">
+        <p>还没有账号？<a href="/register">立即注册</a></p>
+      </div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       const phone = document.getElementById('phone').value.trim();
       const password = document.getElementById('password').value;
-      
-      if (!/^\d{1,11}$/.test(phone)) {
-        alert('请输入正确的手机号');
+      if (!phone || !password) {
+        alert('请填写完整信息');
         e.preventDefault();
-        return;
-      }
-      
-      if (!password) {
-        alert('请输入密码');
-        e.preventDefault();
-        return;
       }
     });
-
-    const rememberCheckbox = document.getElementById('remember');
     const savedPhone = localStorage.getItem('savedPhone');
     if (savedPhone) {
       document.getElementById('phone').value = savedPhone;
-      rememberCheckbox.checked = true;
+      document.getElementById('remember').checked = true;
     }
-
-    rememberCheckbox.addEventListener('change', function() {
+    document.getElementById('remember').addEventListener('change', function() {
       if (this.checked) {
         localStorage.setItem('savedPhone', document.getElementById('phone').value);
       } else {
