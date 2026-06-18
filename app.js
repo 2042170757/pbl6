@@ -78,8 +78,15 @@ function validateUploadCsrf(req, res, next) {
 }
 
 async function ensureColumn(table, column, definition) {
-  const [cols] = await pool.execute(`SHOW COLUMNS FROM ${table} LIKE ?`, [column]);
-  if (cols.length === 0) {
+  const [rows] = await pool.execute(
+    `SELECT COUNT(*) AS count
+     FROM INFORMATION_SCHEMA.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE()
+       AND TABLE_NAME = ?
+       AND COLUMN_NAME = ?`,
+    [table, column]
+  );
+  if (rows[0].count === 0) {
     await pool.execute(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
   }
 }

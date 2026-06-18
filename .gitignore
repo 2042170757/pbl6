@@ -1,4 +1,6 @@
 ﻿node_cache/
 node_modules/
+.env
+logs/
 src/public/uploads/*
 !src/public/uploads/.gitkeep
