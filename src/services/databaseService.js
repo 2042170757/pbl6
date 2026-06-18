@@ -23,6 +23,35 @@ async function ensureColumn(table, column, definition) {
   }
 }
 
+async function ensureIndex(table, indexName, columns, definition) {
+  const [rows] = await pool.execute(
+    `SELECT INDEX_NAME, SEQ_IN_INDEX, COLUMN_NAME
+     FROM INFORMATION_SCHEMA.STATISTICS
+     WHERE TABLE_SCHEMA = DATABASE()
+       AND TABLE_NAME = ?
+     ORDER BY INDEX_NAME, SEQ_IN_INDEX`,
+    [table]
+  );
+
+  const targetColumns = columns.join(',');
+  const existingIndexes = new Map();
+
+  for (const row of rows) {
+    if (!existingIndexes.has(row.INDEX_NAME)) {
+      existingIndexes.set(row.INDEX_NAME, []);
+    }
+    existingIndexes.get(row.INDEX_NAME).push(row.COLUMN_NAME);
+  }
+
+  const hasEquivalentIndex = Array.from(existingIndexes.values()).some(
+    indexColumns => indexColumns.join(',') === targetColumns
+  );
+
+  if (!hasEquivalentIndex) {
+    await pool.execute(`ALTER TABLE ${table} ADD INDEX ${indexName} ${definition}`);
+  }
+}
+
 async function ensureAdminUser() {
   if (!ADMIN_PHONE || !ADMIN_PASSWORD) {
     console.warn('Admin bootstrap skipped: ADMIN_PHONE or ADMIN_PASSWORD is not configured.');
@@ -80,6 +109,9 @@ async function initDatabase() {
       status ENUM('available', 'sold', 'deleted') DEFAULT 'available',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_products_status_created (status, created_at),
+      INDEX idx_products_user_id (user_id),
+      INDEX idx_products_created_at (created_at),
       FOREIGN KEY (user_id) REFERENCES users(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
@@ -106,6 +138,9 @@ async function initDatabase() {
       receiver_address VARCHAR(255),
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_orders_buyer_created (buyer_id, created_at),
+      INDEX idx_orders_seller_created (seller_id, created_at),
+      INDEX idx_orders_status (status),
       FOREIGN KEY (product_id) REFERENCES products(id),
       FOREIGN KEY (buyer_id) REFERENCES users(id),
       FOREIGN KEY (seller_id) REFERENCES users(id)
@@ -116,6 +151,12 @@ async function initDatabase() {
   await ensureColumn('orders', 'receiver_phone', 'VARCHAR(20)');
   await ensureColumn('orders', 'receiver_address', 'VARCHAR(255)');
   await ensureColumn('orders', 'updated_at', 'DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
+  await ensureIndex('products', 'idx_products_status_created', ['status', 'created_at'], '(status, created_at)');
+  await ensureIndex('products', 'idx_products_user_id', ['user_id'], '(user_id)');
+  await ensureIndex('products', 'idx_products_created_at', ['created_at'], '(created_at)');
+  await ensureIndex('orders', 'idx_orders_buyer_created', ['buyer_id', 'created_at'], '(buyer_id, created_at)');
+  await ensureIndex('orders', 'idx_orders_seller_created', ['seller_id', 'created_at'], '(seller_id, created_at)');
+  await ensureIndex('orders', 'idx_orders_status', ['status'], '(status)');
   await ensureAdminUser();
 }
 

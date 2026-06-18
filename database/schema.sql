@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS products (
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_products_status_created (status, created_at),
   INDEX idx_products_user_id (user_id),
+  INDEX idx_products_created_at (created_at),
   CONSTRAINT fk_products_user FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -41,6 +42,7 @@ CREATE TABLE IF NOT EXISTS orders (
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_orders_buyer_created (buyer_id, created_at),
   INDEX idx_orders_seller_created (seller_id, created_at),
+  INDEX idx_orders_status (status),
   CONSTRAINT fk_orders_product FOREIGN KEY (product_id) REFERENCES products(id),
   CONSTRAINT fk_orders_buyer FOREIGN KEY (buyer_id) REFERENCES users(id),
   CONSTRAINT fk_orders_seller FOREIGN KEY (seller_id) REFERENCES users(id)
