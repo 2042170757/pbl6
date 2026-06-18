@@ -1,245 +1,370 @@
 <!DOCTYPE html>
-<html lang='zh-CN'>
+<html lang="zh-CN">
 <head>
-  <meta charset='UTF-8'>
-  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>商品列表 - 校园二手交易平台</title>
   <style>
-    @font-face {
-      font-family: 'KaiTi';
-      src: local('KaiTi'), local('STKaiti'), local('SimKai'), local('楷体');
-    }
+    /* 本地字体，无外部CDN依赖 */
+
     :root {
-      --primary: #1B5E20;
-      --primary-dark: #144518;
-      --secondary: #F5F5DC;
-      --accent: #8B4513;
-      --text: #3E2723;
-      --text-muted: #5D4037;
-      --border: #8D6E63;
-      --bg: #FFF8E1;
-      --bg-paper: #FFFEF5;
+      --bg-deep: #0a0a0f;
+      --bg-card: rgba(15, 15, 25, 0.9);
+      --neon-cyan: #00f0ff;
+      --neon-pink: #ff00aa;
+      --neon-purple: #8b5cf6;
+      --neon-blue: #3b82f6;
+      --text-primary: #e0e0e0;
+      --text-muted: #8892a0;
+      --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.4);
+      --glow-pink: 0 0 20px rgba(255, 0, 170, 0.4);
     }
+
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
+
     body {
-      font-family: 'KaiTi', '楷体', STKaiti, SimKai, serif;
-      background-color: var(--bg);
-      background-image: linear-gradient(90deg, transparent 95%, rgba(139, 69, 19, 0.03) 95%), linear-gradient(transparent 95%, rgba(139, 69, 19, 0.03) 95%);
-      background-size: 20px 20px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+      background: var(--bg-deep);
       min-height: 100vh;
-      color: var(--text);
+      color: var(--text-primary);
+      position: relative;
     }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
     .navbar {
-      background: var(--primary);
+      background: rgba(8, 8, 15, 0.95);
+      backdrop-filter: blur(20px);
       padding: 0 24px;
-      height: 56px;
+      height: 64px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 3px solid var(--primary-dark);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+      position: relative;
+      z-index: 10;
     }
+
+    .navbar::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-pink), transparent);
+    }
+
     .navbar-brand {
       display: flex;
       align-items: center;
-      gap: 12px;
-      color: var(--secondary) !important;
+      gap: 14px;
+      color: var(--text-primary);
       text-decoration: none;
     }
+
     .brand-icon {
-      width: 32px;
-      height: 32px;
-      background: var(--secondary);
-      border-radius: 4px;
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: var(--glow-cyan);
     }
+
     .brand-icon svg {
       width: 20px;
       height: 20px;
-      color: var(--primary);
+      color: #000;
     }
+
     .brand-text {
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
       font-size: 18px;
-      font-weight: bold;
+      font-weight: 700;
       letter-spacing: 2px;
+      background: linear-gradient(90deg, var(--neon-cyan), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
+
     .navbar-user {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 20px;
     }
+
     .user-name {
-      color: var(--secondary);
-      font-size: 14px;
+      color: var(--text-muted);
+      font-size: 15px;
+      font-weight: 500;
     }
+
+    .user-name span {
+      color: var(--neon-cyan);
+    }
+
     .btn-logout {
-      padding: 6px 16px;
-      font-family: inherit;
-      font-size: 13px;
-      color: var(--primary);
-      background: var(--secondary);
-      border: 2px solid var(--primary-dark);
-      border-radius: 4px;
+      padding: 8px 20px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--neon-pink);
+      background: transparent;
+      border: 1px solid var(--neon-pink);
+      border-radius: 6px;
       text-decoration: none;
-      transition: all 0.2s;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
+
     .btn-logout:hover {
-      background: #EFEBE9;
+      background: rgba(255, 0, 170, 0.1);
+      box-shadow: var(--glow-pink);
     }
+
     .container {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
-      padding: 32px 20px;
+      padding: 40px 24px;
+      position: relative;
+      z-index: 1;
     }
+
     .page-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 2px dashed var(--border);
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.1);
     }
+
     .page-title {
-      font-size: 26px;
-      font-weight: bold;
-      color: var(--primary);
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--neon-cyan), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       letter-spacing: 2px;
     }
+
     .btn-publish {
-      padding: 10px 20px;
-      font-family: inherit;
+      padding: 12px 28px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
       font-size: 14px;
-      font-weight: bold;
-      color: var(--secondary);
-      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
-      border: 2px solid var(--primary-dark);
-      border-radius: 4px;
+      font-weight: 600;
+      color: #000;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+      border: none;
+      border-radius: 8px;
       text-decoration: none;
-      transition: all 0.2s;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 2px;
     }
+
     .btn-publish:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(27, 94, 32, 0.3);
+      box-shadow: var(--glow-cyan);
+      transform: translateY(-2px);
     }
+
     .empty-state {
       text-align: center;
-      padding: 60px 20px;
-      background: var(--bg-paper);
-      border: 2px dashed var(--border);
-      border-radius: 8px;
+      padding: 80px 24px;
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 16px;
     }
+
     .empty-state svg {
-      width: 56px;
-      height: 56px;
-      color: var(--border);
-      margin-bottom: 16px;
+      width: 64px;
+      height: 64px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      opacity: 0.5;
     }
+
     .empty-state p {
       color: var(--text-muted);
       font-size: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
+
     .products-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
     }
+
     .product-card {
-      background: var(--bg-paper);
-      border: 2px solid var(--border);
-      border-radius: 8px;
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 240, 255, 0.1);
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 3px 3px 0 rgba(62, 39, 35, 0.1);
-      transition: all 0.2s;
+      transition: all 0.3s;
     }
+
     .product-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 4px 4px 0 rgba(62, 39, 35, 0.15);
+      border-color: var(--neon-cyan);
+      transform: translateY(-4px);
+      box-shadow: var(--glow-cyan);
     }
+
     .product-image {
       width: 100%;
-      height: 160px;
-      background: var(--secondary);
+      height: 180px;
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.05), rgba(139, 92, 246, 0.05));
       display: flex;
       align-items: center;
       justify-content: center;
-      border-bottom: 2px solid var(--border);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+      position: relative;
+      overflow: hidden;
     }
+
+    .product-image::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.1) 0%, transparent 60%);
+      animation: imageGlow 4s ease-in-out infinite;
+    }
+
+    @keyframes imageGlow {
+      0%, 100% { transform: scale(1); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
     .product-image svg {
       width: 48px;
       height: 48px;
-      color: var(--border);
+      color: var(--text-muted);
+      opacity: 0.4;
+      position: relative;
+      z-index: 1;
     }
+
     .product-info {
-      padding: 16px;
+      padding: 20px;
     }
+
     .product-name {
-      font-size: 16px;
-      font-weight: bold;
-      color: var(--text);
-      margin-bottom: 8px;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 10px;
     }
+
     .product-price {
-      font-size: 18px;
-      font-weight: bold;
-      color: var(--accent);
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--neon-pink);
     }
+
+    .product-price::before {
+      content: '¥ ';
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
     @media (max-width: 600px) {
       .page-header {
         flex-direction: column;
-        gap: 16px;
+        gap: 20px;
         align-items: flex-start;
       }
     }
   </style>
 </head>
 <body>
-  <nav class='navbar'>
-    <a class='navbar-brand' href='/'>
-      <div class='brand-icon'>
-        <svg fill='none' stroke='currentColor' viewBox='0 0 24 24' stroke-width='2'>
-          <path stroke-linecap='round' stroke-linejoin='round' d='M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z'></path>
+  <nav class="navbar">
+    <a class="navbar-brand" href="/">
+      <div class="brand-icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
         </svg>
       </div>
-      <span class='brand-text'>校园二手交易</span>
+      <span class="brand-text">校园二手交易</span>
     </a>
-    <div class='navbar-user'>
-      <span class='user-name'>欢迎，<%= user.nickname %></span>
-      <a href='/logout' class='btn-logout'>退出</a>
+    <div class="navbar-user">
+      <span class="user-name">欢迎，<span><%= user.nickname %></span></span>
+      <a href="/logout" class="btn-logout">退出</a>
     </div>
   </nav>
 
-  <div class='container'>
-    <div class='page-header'>
-      <h1 class='page-title'>商品列表</h1>
-      <a href='/products/publish' class='btn-publish'>发布商品</a>
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">商品列表</h1>
+      <a href="/products/publish" class="btn-publish">+ 发布商品</a>
     </div>
 
     <% if (products.length === 0) { %>
-    <div class='empty-state'>
-      <svg fill='none' stroke='currentColor' viewBox='0 0 24 24' stroke-width='2'>
-        <path stroke-linecap='round' stroke-linejoin='round' d='M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'></path>
+    <div class="empty-state">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
       </svg>
-      <p>暂无商品</p>
-      <a href='/products/publish' class='btn-publish'>发布商品</a>
+      <p>暂无商品，快来发布第一个商品吧</p>
+      <a href="/products/publish" class="btn-publish">发布商品</a>
     </div>
     <% } else { %>
-    <div class='products-grid'>
+    <div class="products-grid">
       <% products.forEach(function(p) { %>
-      <div class='product-card'>
-        <div class='product-image'>
-          <svg fill='none' stroke='currentColor' viewBox='0 0 24 24' stroke-width='2'>
-            <path stroke-linecap='round' stroke-linejoin='round' d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'></path>
+      <div class="product-card">
+        <div class="product-image">
+          <% if (p.images) {
+            var images = typeof p.images === 'string' ? JSON.parse(p.images) : p.images;
+            if (images.length > 0) { %>
+              <img src="<%= images[0] %>" alt="<%= p.title %>">
+            <% } else { %>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
           </svg>
+            <% }
+          } else { %>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <% } %>
         </div>
-        <div class='product-info'>
-          <h3 class='product-name'><%= p.name %></h3>
-          <p class='product-price'>¥<%= p.price %></p>
+        <div class="product-info">
+          <h3 class="product-name"><%= p.title %></h3>
+          <p class="product-price"><%= p.price %></p>
         </div>
       </div>
       <% }); %>

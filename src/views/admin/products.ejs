@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>管理后台 - 校园二手交易平台</title>
+  <title>商品管理 - 校园二手交易平台</title>
   <style>
     /* 本地字体，无外部CDN依赖 */
 
@@ -22,11 +22,7 @@
       --glow-pink: 0 0 20px rgba(255, 0, 170, 0.4);
     }
 
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
@@ -39,10 +35,7 @@
     body::before {
       content: '';
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background:
         linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px),
         linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px);
@@ -67,10 +60,7 @@
     .navbar::after {
       content: '';
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
+      bottom: 0; left: 0; right: 0; height: 1px;
       background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-pink), transparent);
     }
 
@@ -83,8 +73,7 @@
     }
 
     .brand-icon {
-      width: 38px;
-      height: 38px;
+      width: 38px; height: 38px;
       background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
       border-radius: 8px;
       display: flex;
@@ -93,11 +82,7 @@
       box-shadow: var(--glow-cyan);
     }
 
-    .brand-icon svg {
-      width: 20px;
-      height: 20px;
-      color: #000;
-    }
+    .brand-icon svg { width: 20px; height: 20px; color: #000; }
 
     .brand-text {
       font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
@@ -110,21 +95,10 @@
       background-clip: text;
     }
 
-    .navbar-user {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
+    .navbar-user { display: flex; align-items: center; gap: 20px; }
 
-    .user-name {
-      color: var(--text-muted);
-      font-size: 15px;
-      font-weight: 500;
-    }
-
-    .user-name span {
-      color: var(--neon-cyan);
-    }
+    .user-name { color: var(--text-muted); font-size: 15px; font-weight: 500; }
+    .user-name span { color: var(--neon-cyan); }
 
     .btn-logout {
       padding: 8px 20px;
@@ -141,17 +115,9 @@
       letter-spacing: 1px;
     }
 
-    .btn-logout:hover {
-      background: rgba(255, 0, 170, 0.1);
-      box-shadow: var(--glow-pink);
-    }
+    .btn-logout:hover { background: rgba(255, 0, 170, 0.1); box-shadow: var(--glow-pink); }
 
-    .layout {
-      display: flex;
-      min-height: calc(100vh - 64px);
-      position: relative;
-      z-index: 1;
-    }
+    .layout { display: flex; min-height: calc(100vh - 64px); position: relative; z-index: 1; }
 
     .sidebar {
       width: 240px;
@@ -161,13 +127,9 @@
       flex-shrink: 0;
     }
 
-    .sidebar-nav {
-      list-style: none;
-    }
+    .sidebar-nav { list-style: none; }
 
-    .sidebar-item {
-      margin-bottom: 4px;
-    }
+    .sidebar-item { margin-bottom: 4px; }
 
     .sidebar-link {
       display: flex;
@@ -183,10 +145,7 @@
       position: relative;
     }
 
-    .sidebar-link:hover {
-      background: rgba(0, 240, 255, 0.05);
-      color: var(--neon-cyan);
-    }
+    .sidebar-link:hover { background: rgba(0, 240, 255, 0.05); color: var(--neon-cyan); }
 
     .sidebar-link.active {
       background: rgba(0, 240, 255, 0.1);
@@ -197,40 +156,24 @@
     .sidebar-link.active::before {
       content: '';
       position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 3px;
+      left: 0; top: 0; bottom: 0; width: 3px;
       background: var(--neon-cyan);
       box-shadow: var(--glow-cyan);
     }
 
-    .sidebar-link svg {
-      width: 20px;
-      height: 20px;
-    }
+    .sidebar-link svg { width: 20px; height: 20px; }
 
-    .main {
-      flex: 1;
-      padding: 32px;
-      overflow-y: auto;
-    }
+    .main { flex: 1; padding: 32px; overflow-y: auto; }
 
-    .main-inner {
-      max-width: 1000px;
-    }
+    .main-inner { max-width: 1200px; }
 
     .page-header {
-      margin-bottom: 36px;
+      margin-bottom: 32px;
       padding-bottom: 24px;
       border-bottom: 1px solid rgba(0, 240, 255, 0.1);
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-    }
-
-    .page-header-left {
-      flex: 1;
+      align-items: center;
     }
 
     .btn-back {
@@ -255,10 +198,7 @@
       background: rgba(0, 240, 255, 0.05);
     }
 
-    .btn-back svg {
-      width: 16px;
-      height: 16px;
-    }
+    .btn-back svg { width: 16px; height: 16px; }
 
     .page-title {
       font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
@@ -268,166 +208,155 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 8px;
       letter-spacing: 2px;
     }
 
-    .page-subtitle {
-      font-size: 15px;
-      color: var(--text-muted);
-    }
+    .page-subtitle { font-size: 15px; color: var(--text-muted); }
+    .page-subtitle span { color: var(--neon-pink); }
 
-    .page-subtitle span {
-      color: var(--neon-pink);
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 24px;
-      margin-bottom: 40px;
-    }
-
-    .stat-card {
-      background: var(--bg-card);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(0, 240, 255, 0.15);
-      border-radius: 12px;
-      padding: 24px;
-      transition: all 0.3s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
-    }
-
-    .stat-card:hover {
-      border-color: rgba(0, 240, 255, 0.3);
-      transform: translateY(-4px);
-      box-shadow: var(--glow-cyan);
-    }
-
-    .stat-icon {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(139, 92, 246, 0.2));
-      border-radius: 10px;
+    .filter-tabs {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 16px;
-      border: 1px solid rgba(0, 240, 255, 0.2);
+      gap: 12px;
+      margin-bottom: 24px;
     }
 
-    .stat-icon svg {
-      width: 24px;
-      height: 24px;
-      color: var(--neon-cyan);
-    }
-
-    .stat-value {
+    .filter-tab {
+      padding: 8px 20px;
       font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-      font-size: 36px;
-      font-weight: 700;
-      color: var(--neon-cyan);
-      margin-bottom: 6px;
-      text-shadow: var(--glow-cyan);
-    }
-
-    .stat-label {
       font-size: 14px;
+      font-weight: 600;
       color: var(--text-muted);
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 240, 255, 0.1);
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.3s;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
 
-    .section-title {
-      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 20px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
+    .filter-tab:hover { color: var(--neon-cyan); border-color: rgba(0, 240, 255, 0.3); }
+
+    .filter-tab.active {
+      color: var(--neon-cyan);
+      border-color: var(--neon-cyan);
+      background: rgba(0, 240, 255, 0.08);
     }
 
-    .actions-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-    }
-
-    .action-card {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      padding: 20px;
+    .data-table-wrap {
       background: var(--bg-card);
       backdrop-filter: blur(20px);
-      border: 1px solid rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.15);
       border-radius: 12px;
-      text-decoration: none;
-      transition: all 0.3s;
+      overflow: hidden;
     }
 
-    .action-card:hover {
-      border-color: var(--neon-purple);
-      transform: translateY(-2px);
-      box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
     }
 
-    .action-icon {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(255, 0, 170, 0.2));
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      border: 1px solid rgba(139, 92, 246, 0.2);
-    }
-
-    .action-icon svg {
-      width: 22px;
-      height: 22px;
-      color: var(--neon-purple);
-    }
-
-    .action-content {
-      flex: 1;
-    }
-
-    .action-title {
-      font-size: 16px;
+    .data-table th {
+      padding: 16px 20px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 12px;
       font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 4px;
+      color: var(--neon-cyan);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-align: left;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+      background: rgba(0, 240, 255, 0.05);
     }
 
-    .action-desc {
-      font-size: 13px;
-      color: var(--text-muted);
+    .data-table td {
+      padding: 14px 20px;
+      font-size: 14px;
+      color: var(--text-primary);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.06);
+      vertical-align: middle;
     }
+
+    .data-table tr:last-child td { border-bottom: none; }
+
+    .data-table tr:hover td { background: rgba(0, 240, 255, 0.03); }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .status-available {
+      background: rgba(0, 255, 136, 0.15);
+      color: var(--neon-green);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+    }
+
+    .status-sold {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--neon-purple);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .status-deleted {
+      background: rgba(255, 0, 170, 0.15);
+      color: var(--neon-pink);
+      border: 1px solid rgba(255, 0, 170, 0.3);
+    }
+
+    .btn-delete {
+      padding: 6px 16px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--neon-pink);
+      background: transparent;
+      border: 1px solid var(--neon-pink);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-delete:hover {
+      background: rgba(255, 0, 170, 0.15);
+      box-shadow: var(--glow-pink);
+    }
+
+    .price-tag {
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      color: var(--neon-cyan);
+      font-weight: 600;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+    }
+
+    .empty-state svg {
+      width: 56px; height: 56px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+
+    .empty-state p { color: var(--text-muted); font-size: 15px; }
 
     @media (max-width: 768px) {
-      .sidebar {
-        display: none;
-      }
-      .main {
-        padding: 24px 16px;
-      }
-      .page-title {
-        font-size: 24px;
-      }
+      .sidebar { display: none; }
+      .main { padding: 24px 16px; }
+      .page-title { font-size: 22px; }
+      .data-table { font-size: 12px; }
+      .data-table th, .data-table td { padding: 10px 12px; }
     }
   </style>
 </head>
@@ -451,7 +380,7 @@
     <aside class="sidebar">
       <ul class="sidebar-nav">
         <li class="sidebar-item">
-          <a href="/admin" class="sidebar-link active">
+          <a href="/admin" class="sidebar-link">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
             </svg>
@@ -467,7 +396,7 @@
           </a>
         </li>
         <li class="sidebar-item">
-          <a href="/admin/products" class="sidebar-link">
+          <a href="/admin/products" class="sidebar-link active">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
             </svg>
@@ -488,74 +417,69 @@
     <main class="main">
       <div class="main-inner">
         <div class="page-header">
-          <div class="page-header-left">
-            <h1 class="page-title">管理后台</h1>
-            <p class="page-subtitle">欢迎回来，<span><%= user.nickname %></span></p>
+          <div>
+            <h1 class="page-title">商品管理</h1>
+            <p class="page-subtitle">共 <span><%= products.length %></span> 件商品</p>
           </div>
-          <a href="/products" class="btn-back">
+          <a href="/admin" class="btn-back">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
-            返回前台
+            返回首页
           </a>
         </div>
 
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-              </svg>
-            </div>
-            <div class="stat-value"><%= stats.userCount %></div>
-            <div class="stat-label">注册用户</div>
+        <div class="data-table-wrap">
+          <% if (products.length === 0) { %>
+          <div class="empty-state">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+            <p>暂无商品记录</p>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-              </svg>
-            </div>
-            <div class="stat-value"><%= stats.productCount %></div>
-            <div class="stat-label">在售商品</div>
-          </div>
-        </div>
-
-        <h2 class="section-title">快捷操作</h2>
-        <div class="actions-grid">
-          <a href="/admin/users" class="action-card">
-            <div class="action-icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-              </svg>
-            </div>
-            <div class="action-content">
-              <h3 class="action-title">用户管理</h3>
-              <p class="action-desc">查看和管理注册用户</p>
-            </div>
-          </a>
-          <a href="/admin/products" class="action-card">
-            <div class="action-icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-              </svg>
-            </div>
-            <div class="action-content">
-              <h3 class="action-title">商品管理</h3>
-              <p class="action-desc">管理所有商品</p>
-            </div>
-          </a>
-          <a href="/admin/orders" class="action-card">
-            <div class="action-icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-              </svg>
-            </div>
-            <div class="action-content">
-              <h3 class="action-title">订单管理</h3>
-              <p class="action-desc">查看和处理订单</p>
-            </div>
-          </a>
+          <% } else { %>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>商品标题</th>
+                <th>卖家</th>
+                <th>价格</th>
+                <th>状态</th>
+                <th>上架时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% products.forEach(function(p) { %>
+              <tr>
+                <td><%= p.id %></td>
+                <td><%= p.title %></td>
+                <td><%= p.nickname || '未知' %></td>
+                <td><span class="price-tag">¥<%= parseFloat(p.price).toFixed(2) %></span></td>
+                <td>
+                  <% if (p.status === 'available') { %>
+                    <span class="status-badge status-available">在售</span>
+                  <% } else if (p.status === 'sold') { %>
+                    <span class="status-badge status-sold">已售</span>
+                  <% } else { %>
+                    <span class="status-badge status-deleted">已删除</span>
+                  <% } %>
+                </td>
+                <td><%= p.created_at ? p.created_at.toISOString().slice(0, 19).replace('T', ' ') : '-' %></td>
+                <td>
+                  <% if (p.status !== 'deleted') { %>
+                  <a href="javascript:void(0)" class="btn-delete"
+                     onclick="if(confirm('确定强制下架该商品？')) { fetch('/admin/products/delete/<%= p.id %>', {method:'POST'}).then(()=>location.reload()); }">强制下架</a>
+                  <% } else { %>
+                  <span style="color:var(--text-muted);font-size:12px;">—</span>
+                  <% } %>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+          <% } %>
         </div>
       </div>
     </main>

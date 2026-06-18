@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>发布商品 - 校园二手交易平台</title>
+  <style>
+    /* 本地字体，无外部CDN依赖 */
+
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-card: rgba(15, 15, 25, 0.9);
+      --neon-cyan: #00f0ff;
+      --neon-pink: #ff00aa;
+      --neon-purple: #8b5cf6;
+      --neon-blue: #3b82f6;
+      --text-primary: #e0e0e0;
+      --text-muted: #8892a0;
+      --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.4);
+      --glow-pink: 0 0 20px rgba(255, 0, 170, 0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+      background: var(--bg-deep);
+      min-height: 100vh;
+      color: var(--text-primary);
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .navbar {
+      background: rgba(8, 8, 15, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+      position: relative;
+      z-index: 10;
+    }
+
+    .navbar::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-pink), transparent);
+    }
+
+    .navbar-brand { display: flex; align-items: center; gap: 14px; color: var(--text-primary); text-decoration: none; }
+
+    .brand-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--glow-cyan);
+    }
+
+    .brand-icon svg { width: 20px; height: 20px; color: #000; }
+
+    .brand-text {
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, var(--neon-cyan), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .navbar-user { display: flex; align-items: center; gap: 20px; }
+    .user-name { color: var(--text-muted); font-size: 15px; font-weight: 500; }
+    .user-name span { color: var(--neon-cyan); }
+
+    .btn-logout {
+      padding: 8px 20px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--neon-pink);
+      background: transparent;
+      border: 1px solid var(--neon-pink);
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-logout:hover { background: rgba(255, 0, 170, 0.1); box-shadow: var(--glow-pink); }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-header {
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .header-left {
+      flex: 1;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .btn-back:hover {
+      color: var(--neon-cyan);
+      border-color: var(--neon-cyan);
+      background: rgba(0, 240, 255, 0.05);
+    }
+
+    .btn-back svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .page-title {
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--neon-cyan), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .page-subtitle { font-size: 15px; color: var(--text-muted); }
+
+    .form-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 16px;
+      padding: 32px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-label {
+      display: block;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--neon-cyan);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
+    .form-label span { color: var(--neon-pink); }
+
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+      font-size: 16px;
+      color: var(--text-primary);
+      background: rgba(0, 240, 255, 0.04);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 8px;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.6;
+    }
+
+    .price-input-wrap {
+      position: relative;
+    }
+
+    .price-input-wrap .form-input {
+      padding-left: 36px;
+    }
+
+    .price-prefix {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 16px;
+      color: var(--neon-cyan);
+      font-weight: 600;
+    }
+
+    .upload-area {
+      border: 2px dashed rgba(0, 240, 255, 0.2);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: rgba(0, 240, 255, 0.02);
+    }
+
+    .upload-area:hover, .upload-area.dragover {
+      border-color: var(--neon-cyan);
+      background: rgba(0, 240, 255, 0.05);
+    }
+
+    .upload-area svg {
+      width: 48px; height: 48px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+
+    .upload-area p { color: var(--text-muted); font-size: 14px; }
+    .upload-area .hint { font-size: 12px; margin-top: 6px; }
+
+    #file-input { display: none; }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .preview-item {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      aspect-ratio: 1;
+    }
+
+    .preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .preview-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 22px; height: 22px;
+      background: rgba(255, 0, 170, 0.9);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .preview-remove:hover { background: var(--neon-pink); }
+
+    .error-msg {
+      background: rgba(255, 0, 170, 0.1);
+      border: 1px solid rgba(255, 0, 170, 0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: var(--neon-pink);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #000;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    .btn-submit:hover {
+      box-shadow: var(--glow-cyan);
+      transform: translateY(-2px);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 24px 16px; }
+      .form-card { padding: 20px; }
+      .page-title { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a class="navbar-brand" href="/">
+      <div class="brand-icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+        </svg>
+      </div>
+      <span class="brand-text">校园二手交易</span>
+    </a>
+    <div class="navbar-user">
+      <span class="user-name">欢迎，<span><%= user.nickname %></span></span>
+      <a href="/logout" class="btn-logout">退出</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <div class="header-left">
+        <h1 class="page-title">发布商品</h1>
+        <p class="page-subtitle">填写商品信息并上传照片</p>
+      </div>
+      <a href="/products" class="btn-back">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        返回商品列表
+      </a>
+    </div>
+
+    <div class="form-card">
+      <% if (error) { %>
+      <div class="error-msg"><%= error %></div>
+      <% } %>
+
+      <form id="publish-form" action="/products/publish" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label class="form-label">商品标题 <span>*</span></label>
+          <input type="text" name="title" class="form-input"
+                 placeholder="例如：九成新高等数学教材" required maxlength="100"
+                 id="title-input">
+          <p class="form-hint">最多100个字符</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">商品描述</label>
+          <textarea name="description" class="form-textarea"
+                    placeholder="描述商品的成色、版本、入手渠道等信息" maxlength="500"
+                    id="desc-input"></textarea>
+          <p class="form-hint">最多500个字符</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">价格（元）<span>*</span></label>
+          <div class="price-input-wrap">
+            <span class="price-prefix">¥</span>
+            <input type="number" name="price" class="form-input"
+                   placeholder="0.00" required min="0.01" step="0.01"
+                   id="price-input">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">商品图片 <span>*</span>（最多6张）</label>
+          <div class="upload-area" id="upload-area">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <p>点击或拖拽上传图片</p>
+            <p class="hint">支持 JPG、PNG 格式，单张不超过 5MB</p>
+          </div>
+          <input type="file" id="file-input" name="images" multiple accept="image/jpeg,image/png,image/jpg">
+          <div class="preview-grid" id="preview-grid"></div>
+          <p class="form-hint" id="img-count-hint" style="display:none;"></p>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submit-btn">发布商品</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    var MAX_IMAGES = 6;
+    var selectedFiles = [];
+
+    var uploadArea = document.getElementById('upload-area');
+    var fileInput = document.getElementById('file-input');
+    var previewGrid = document.getElementById('preview-grid');
+    var imgCountHint = document.getElementById('img-count-hint');
+    var form = document.getElementById('publish-form');
+    var submitBtn = document.getElementById('submit-btn');
+
+    // Update hidden input when files change
+    function syncFiles() {
+      var dt = new DataTransfer();
+      selectedFiles.forEach(function(f) { dt.items.add(f); });
+      fileInput.files = dt.files;
+      updatePreview();
+      updateHint();
+    }
+
+    function updatePreview() {
+      previewGrid.innerHTML = '';
+      selectedFiles.forEach(function(file, i) {
+        var div = document.createElement('div');
+        div.className = 'preview-item';
+        var img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'preview-remove';
+        btn.textContent = '×';
+        btn.onclick = function() {
+          selectedFiles.splice(i, 1);
+          syncFiles();
+        };
+        div.appendChild(img);
+        div.appendChild(btn);
+        previewGrid.appendChild(div);
+      });
+    }
+
+    function updateHint() {
+      if (selectedFiles.length > 0) {
+        imgCountHint.style.display = 'block';
+        imgCountHint.textContent = '已选择 ' + selectedFiles.length + ' / ' + MAX_IMAGES + ' 张图片';
+      } else {
+        imgCountHint.style.display = 'none';
+      }
+    }
+
+    uploadArea.addEventListener('click', function() { fileInput.click(); });
+
+    uploadArea.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', function() {
+      uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', function() {
+      handleFiles(fileInput.files);
+    });
+
+    function handleFiles(files) {
+      for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        if (!f.type.match(/^image\/(jpeg|png|jpg)$/)) continue;
+        if (f.size > 5 * 1024 * 1024) continue;
+        if (selectedFiles.length >= MAX_IMAGES) break;
+        selectedFiles.push(f);
+      }
+      syncFiles();
+    }
+
+    // Client-side validation
+    form.addEventListener('submit', function(e) {
+      var title = document.getElementById('title-input').value.trim();
+      var price = document.getElementById('price-input').value;
+      var err = null;
+
+      if (!title) err = '请填写商品标题';
+      else if (price === '' || parseFloat(price) <= 0) err = '请填写有效的价格';
+      else if (selectedFiles.length === 0) err = '请至少上传1张商品图片';
+      else if (selectedFiles.length > MAX_IMAGES) err = '图片最多' + MAX_IMAGES + '张';
+
+      if (err) {
+        e.preventDefault();
+        var card = document.querySelector('.form-card');
+        var existing = card.querySelector('.error-msg');
+        if (existing) existing.remove();
+        var msg = document.createElement('div');
+        msg.className = 'error-msg';
+        msg.textContent = err;
+        card.insertBefore(msg, card.firstChild);
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = '正在发布...';
+    });
+  </script>
+</body>
+</html>

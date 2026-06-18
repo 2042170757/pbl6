@@ -1,285 +1,387 @@
 <!DOCTYPE html>
-<html lang='zh-CN'>
+<html lang="zh-CN">
 <head>
-  <meta charset='UTF-8'>
-  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>用户管理 - 校园二手交易平台</title>
   <style>
-    @font-face {
-      font-family: 'KaiTi';
-      src: local('KaiTi'), local('STKaiti'), local('SimKai'), local('楷体');
-    }
+    /* 本地字体，无外部CDN依赖 */
+
     :root {
-      --primary: #1B5E20;
-      --primary-dark: #144518;
-      --secondary: #F5F5DC;
-      --accent: #8B4513;
-      --text: #3E2723;
-      --text-muted: #5D4037;
-      --border: #8D6E63;
-      --bg: #FFF8E1;
-      --bg-paper: #FFFEF5;
-      --sidebar-bg: #1B4D1E;
+      --bg-deep: #0a0a0f;
+      --bg-card: rgba(15, 15, 25, 0.9);
+      --bg-sidebar: rgba(8, 8, 15, 0.95);
+      --neon-cyan: #00f0ff;
+      --neon-pink: #ff00aa;
+      --neon-purple: #8b5cf6;
+      --neon-blue: #3b82f6;
+      --text-primary: #e0e0e0;
+      --text-muted: #8892a0;
+      --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.4);
+      --glow-pink: 0 0 20px rgba(255, 0, 170, 0.4);
     }
+
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
+
     body {
-      font-family: 'KaiTi', '楷体', STKaiti, SimKai, serif;
-      background-color: var(--bg);
-      background-image: linear-gradient(90deg, transparent 95%, rgba(139, 69, 19, 0.03) 95%), linear-gradient(transparent 95%, rgba(139, 69, 19, 0.03) 95%);
-      background-size: 20px 20px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+      background: var(--bg-deep);
       min-height: 100vh;
-      color: var(--text);
+      color: var(--text-primary);
+      position: relative;
     }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
     .navbar {
-      background: var(--primary);
+      background: var(--bg-sidebar);
+      backdrop-filter: blur(20px);
       padding: 0 24px;
-      height: 56px;
+      height: 64px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 3px solid var(--primary-dark);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+      position: relative;
+      z-index: 10;
     }
+
+    .navbar::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-pink), transparent);
+    }
+
     .navbar-brand {
       display: flex;
       align-items: center;
-      gap: 12px;
-      color: var(--secondary) !important;
+      gap: 14px;
+      color: var(--text-primary);
       text-decoration: none;
     }
+
     .brand-icon {
-      width: 32px;
-      height: 32px;
-      background: var(--secondary);
-      border-radius: 4px;
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: var(--glow-cyan);
     }
+
     .brand-icon svg {
       width: 20px;
       height: 20px;
-      color: var(--primary);
+      color: #000;
     }
+
     .brand-text {
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
       font-size: 18px;
-      font-weight: bold;
+      font-weight: 700;
       letter-spacing: 2px;
+      background: linear-gradient(90deg, var(--neon-cyan), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
+
     .navbar-user {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 20px;
     }
+
     .user-name {
-      color: var(--secondary);
-      font-size: 14px;
+      color: var(--text-muted);
+      font-size: 15px;
+      font-weight: 500;
     }
+
     .btn-logout {
-      padding: 6px 16px;
-      font-family: inherit;
-      font-size: 13px;
-      color: var(--primary);
-      background: var(--secondary);
-      border: 2px solid var(--primary-dark);
-      border-radius: 4px;
+      padding: 8px 20px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--neon-pink);
+      background: transparent;
+      border: 1px solid var(--neon-pink);
+      border-radius: 6px;
       text-decoration: none;
-      transition: all 0.2s;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
+
     .btn-logout:hover {
-      background: #EFEBE9;
+      background: rgba(255, 0, 170, 0.1);
+      box-shadow: var(--glow-pink);
     }
+
     .layout {
       display: flex;
-      min-height: calc(100vh - 56px);
+      min-height: calc(100vh - 64px);
+      position: relative;
+      z-index: 1;
     }
+
     .sidebar {
-      width: 200px;
-      background: var(--sidebar-bg);
-      border-right: 3px solid var(--primary-dark);
-      padding: 16px 0;
+      width: 240px;
+      background: var(--bg-sidebar);
+      border-right: 1px solid rgba(0, 240, 255, 0.1);
+      padding: 24px 0;
       flex-shrink: 0;
     }
+
     .sidebar-nav {
       list-style: none;
     }
+
     .sidebar-item {
       margin-bottom: 4px;
     }
+
     .sidebar-link {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 12px 20px;
-      color: #C8E6C9;
+      gap: 14px;
+      padding: 14px 24px;
+      color: var(--text-muted);
       text-decoration: none;
-      font-size: 14px;
-      transition: all 0.2s;
-      border-left: 4px solid transparent;
+      font-size: 15px;
+      font-weight: 500;
+      transition: all 0.3s;
+      border-left: 3px solid transparent;
     }
+
     .sidebar-link:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--secondary);
+      background: rgba(0, 240, 255, 0.05);
+      color: var(--neon-cyan);
     }
+
     .sidebar-link.active {
-      background: rgba(255, 255, 255, 0.15);
-      color: var(--secondary);
-      border-left-color: #FFEB3B;
+      background: rgba(0, 240, 255, 0.1);
+      color: var(--neon-cyan);
+      border-left-color: var(--neon-cyan);
     }
+
+    .sidebar-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--neon-cyan);
+      box-shadow: var(--glow-cyan);
+    }
+
     .sidebar-link svg {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
     }
+
     .main {
       flex: 1;
-      padding: 28px;
+      padding: 32px;
       overflow-y: auto;
     }
+
     .page-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 2px dashed var(--border);
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.1);
     }
+
     .page-title {
-      font-size: 24px;
-      font-weight: bold;
-      color: var(--primary);
-      letter-spacing: 2px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--neon-cyan), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
     }
+
     .page-subtitle {
       font-size: 14px;
       color: var(--text-muted);
-      margin-top: 4px;
     }
+
     .btn-back {
-      padding: 8px 16px;
-      font-family: inherit;
-      font-size: 13px;
-      color: var(--primary);
-      background: var(--bg-paper);
-      border: 2px solid var(--border);
-      border-radius: 4px;
+      padding: 10px 20px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--neon-cyan);
+      background: transparent;
+      border: 1px solid var(--neon-cyan);
+      border-radius: 6px;
       text-decoration: none;
-      transition: all 0.2s;
+      transition: all 0.3s;
     }
+
     .btn-back:hover {
-      background: var(--secondary);
-      border-color: var(--primary);
+      background: rgba(0, 240, 255, 0.1);
+      box-shadow: var(--glow-cyan);
     }
+
     .table-card {
-      background: var(--bg-paper);
-      border: 2px solid var(--border);
-      border-radius: 8px;
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 3px 3px 0 rgba(62, 39, 35, 0.1);
     }
+
     .table {
       width: 100%;
       border-collapse: collapse;
     }
+
     .table thead {
-      background: var(--primary);
+      background: rgba(0, 240, 255, 0.05);
     }
+
     .table thead th {
-      padding: 14px 16px;
+      padding: 16px 20px;
       text-align: left;
-      color: var(--secondary);
-      font-size: 14px;
-      font-weight: bold;
+      color: var(--neon-cyan);
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
       letter-spacing: 1px;
-      border-bottom: 2px solid var(--primary-dark);
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.1);
     }
+
     .table tbody td {
-      padding: 14px 16px;
-      border-bottom: 1px dashed var(--border);
-      font-size: 14px;
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.08);
+      font-size: 15px;
+      color: var(--text-primary);
     }
+
     .table tbody tr:hover {
-      background: rgba(27, 94, 32, 0.05);
+      background: rgba(0, 240, 255, 0.03);
     }
+
     .table tbody tr:last-child td {
       border-bottom: none;
     }
+
     .phone-cell {
-      font-family: monospace;
+      font-family: 'Consolas', monospace;
+      font-weight: 500;
+      color: var(--neon-purple);
     }
+
     .btn-delete {
-      padding: 6px 12px;
-      font-family: inherit;
-      font-size: 12px;
-      color: #FFF;
-      background: #C62828;
-      border: 2px solid #B71C1C;
-      border-radius: 4px;
+      padding: 8px 16px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      background: rgba(255, 0, 100, 0.2);
+      border: 1px solid rgba(255, 0, 170, 0.4);
+      border-radius: 6px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
+
     .btn-delete:hover {
-      background: #B71C1C;
+      background: rgba(255, 0, 170, 0.3);
+      box-shadow: var(--glow-pink);
     }
+
     .empty-state {
       text-align: center;
-      padding: 48px 20px;
+      padding: 60px 24px;
       color: var(--text-muted);
     }
+
     .empty-state svg {
-      width: 48px;
-      height: 48px;
-      margin-bottom: 12px;
-      opacity: 0.5;
+      width: 56px;
+      height: 56px;
+      margin-bottom: 16px;
+      opacity: 0.4;
     }
+
     @media (max-width: 768px) {
       .sidebar {
         display: none;
       }
       .main {
-        padding: 20px 16px;
+        padding: 24px 16px;
       }
       .page-header {
         flex-direction: column;
-        gap: 12px;
+        gap: 16px;
         align-items: flex-start;
       }
     }
   </style>
 </head>
 <body>
-  <nav class='navbar'>
-    <a class='navbar-brand' href='/admin'>
-      <div class='brand-icon'>
-        <svg fill='none' stroke='currentColor' viewBox='0 0 24 24' stroke-width='2'>
-          <path stroke-linecap='round' stroke-linejoin='round' d='M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'></path>
+  <nav class="navbar">
+    <a class="navbar-brand" href="/admin">
+      <div class="brand-icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
         </svg>
       </div>
-      <span class='brand-text'>校园二手交易</span>
+      <span class="brand-text">校园二手交易</span>
     </a>
-    <div class='navbar-user'>
-      <span class='user-name'><%= user.nickname %></span>
-      <a href='/logout' class='btn-logout'>退出</a>
+    <div class="navbar-user">
+      <span class="user-name"><%= user.nickname %></span>
+      <a href="/logout" class="btn-logout">退出</a>
     </div>
   </nav>
 
-  <div class='layout'>
-    <aside class='sidebar'>
-      <ul class='sidebar-nav'>
-        <li class='sidebar-item'>
-          <a href='/admin' class='sidebar-link'>
-            <svg fill='none' stroke='currentColor' viewBox='0 0 24 24' stroke-width='2'>
-              <path stroke-linecap='round' stroke-linejoin='round' d='M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'></path>
+  <div class="layout">
+    <aside class="sidebar">
+      <ul class="sidebar-nav">
+        <li class="sidebar-item">
+          <a href="/admin" class="sidebar-link">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
             </svg>
             首页
           </a>
         </li>
-        <li class='sidebar-item'>
-          <a href='/admin/users' class='sidebar-link active'>
-            <svg fill='none' stroke='currentColor' viewBox='0 0 24 24' stroke-width='2'>
-              <path stroke-linecap='round' stroke-linejoin='round' d='M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'></path>
+        <li class="sidebar-item">
+          <a href="/admin/users" class="sidebar-link active">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
             </svg>
             用户管理
           </a>
@@ -287,27 +389,27 @@
       </ul>
     </aside>
 
-    <main class='main'>
-      <div class='page-header'>
+    <main class="main">
+      <div class="page-header">
         <div>
-          <h1 class='page-title'>用户管理</h1>
-          <p class='page-subtitle'>查看和管理普通用户</p>
+          <h1 class="page-title">用户管理</h1>
+          <p class="page-subtitle">查看和管理普通用户</p>
         </div>
-        <a href='/admin' class='btn-back'>返回首页</a>
+        <a href="/admin" class="btn-back">返回首页</a>
       </div>
 
       <% if (users.length === 0) { %>
-      <div class='table-card'>
-        <div class='empty-state'>
-          <svg fill='none' stroke='currentColor' viewBox='0 0 24 24' stroke-width='2'>
-            <path stroke-linecap='round' stroke-linejoin='round' d='M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'></path>
+      <div class="table-card">
+        <div class="empty-state">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
           </svg>
           <p>暂无普通用户</p>
         </div>
       </div>
       <% } else { %>
-      <div class='table-card'>
-        <table class='table'>
+      <div class="table-card">
+        <table class="table">
           <thead>
             <tr>
               <th>ID</th>
@@ -321,12 +423,12 @@
             <% users.forEach(function(u) { %>
             <tr>
               <td><%= u.id %></td>
-              <td class='phone-cell'><%= u.phone %></td>
+              <td class="phone-cell"><%= u.phone %></td>
               <td><%= u.nickname %></td>
               <td><%= new Date(u.created_at).toLocaleString('zh-CN') %></td>
               <td>
-                <form action='/admin/users/delete/<%= u.id %>' method='POST' style='display: inline;' onsubmit='return confirm("确定要删除该用户吗？");'>
-                  <button type='submit' class='btn-delete'>删除</button>
+                <form action="/admin/users/delete/<%= u.id %>" method="POST" style="display: inline;" onsubmit="return confirm('确定要删除该用户吗？');">
+                  <button type="submit" class="btn-delete">删除</button>
                 </form>
               </td>
             </tr>

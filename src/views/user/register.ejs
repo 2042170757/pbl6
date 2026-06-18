@@ -5,220 +5,360 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>注册 - 校园二手交易平台</title>
   <style>
-    @font-face {
-      font-family: 'KaiTi';
-      src: local('KaiTi'), local('STKaiti'), local('SimKai'), local('楷体');
-    }
+    /* 本地字体，无外部CDN依赖 */
+
     :root {
-      --primary: #1B5E20;
-      --primary-dark: #144518;
-      --secondary: #F5F5DC;
-      --accent: #8B4513;
-      --text: #3E2723;
-      --text-muted: #5D4037;
-      --border: #8D6E63;
-      --bg: #FFF8E1;
-      --bg-paper: #FFFEF5;
+      --bg-deep: #0a0a0f;
+      --bg-card: rgba(15, 15, 25, 0.85);
+      --neon-cyan: #00f0ff;
+      --neon-pink: #ff00aa;
+      --neon-purple: #8b5cf6;
+      --neon-blue: #3b82f6;
+      --text-primary: #e0e0e0;
+      --text-muted: #8892a0;
+      --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.4);
+      --glow-pink: 0 0 20px rgba(255, 0, 170, 0.4);
     }
+
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
+
     body {
-      font-family: "KaiTi", "楷体", STKaiti, SimKai, serif;
-      background-color: var(--bg);
-      background-image:
-        linear-gradient(90deg, transparent 95%, rgba(139, 69, 19, 0.03) 95%),
-        linear-gradient(transparent 95%, rgba(139, 69, 19, 0.03) 95%);
-      background-size: 20px 20px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+      background: var(--bg-deep);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
-      color: var(--text);
+      color: var(--text-primary);
+      position: relative;
+      overflow: hidden;
     }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: gridMove 20s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px;
+      right: -200px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: orbFloat 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .orb-2 {
+      position: fixed;
+      bottom: -200px;
+      left: -200px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255, 0, 170, 0.12) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: orbFloat 10s ease-in-out infinite reverse;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(30px, -30px); }
+    }
+
     .auth-container {
       width: 100%;
-      max-width: 380px;
-    }
-    .auth-card {
-      background: var(--bg-paper);
-      border: 3px double var(--border);
-      border-radius: 8px;
-      padding: 40px 36px;
-      box-shadow: 4px 4px 0 rgba(62, 39, 35, 0.15);
-      position: relative;
-    }
-    .auth-card::before {
-      content: '';
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      right: 8px;
-      bottom: 8px;
-      border: 1px dashed var(--border);
-      border-radius: 4px;
-      pointer-events: none;
-      opacity: 0.5;
-    }
-    .auth-header {
-      text-align: center;
-      margin-bottom: 32px;
-      position: relative;
-    }
-    .auth-icon {
-      width: 56px;
-      height: 56px;
-      background: var(--primary);
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 16px;
-      border: 2px solid var(--primary-dark);
-    }
-    .auth-icon svg {
-      width: 28px;
-      height: 28px;
-      color: var(--secondary);
-    }
-    .auth-title {
-      font-size: 28px;
-      font-weight: bold;
-      color: var(--primary);
-      margin-bottom: 8px;
-      letter-spacing: 4px;
-    }
-    .auth-subtitle {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-    .form-group {
-      margin-bottom: 20px;
+      max-width: 420px;
       position: relative;
       z-index: 1;
     }
+
+    .auth-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 16px;
+      padding: 48px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-pink), transparent);
+      animation: borderGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes borderGlow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    .auth-card::after {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      border: 1px solid rgba(0, 240, 255, 0.1);
+      border-radius: 12px;
+      pointer-events: none;
+    }
+
+    .corner {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--neon-cyan);
+    }
+
+    .corner-tl { top: -1px; left: -1px; border-right: none; border-bottom: none; border-radius: 16px 0 0 0; }
+    .corner-tr { top: -1px; right: -1px; border-left: none; border-bottom: none; border-radius: 0 16px 0 0; }
+    .corner-bl { bottom: -1px; left: -1px; border-right: none; border-top: none; border-radius: 0 0 0 16px; }
+    .corner-br { bottom: -1px; right: -1px; border-left: none; border-top: none; border-radius: 0 0 16px 0; }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .auth-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 20px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .auth-icon::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+      border-radius: 16px;
+      animation: iconGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes iconGlow {
+      0%, 100% { box-shadow: var(--glow-pink); }
+      50% { box-shadow: var(--glow-cyan); }
+    }
+
+    .auth-icon svg {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      color: #fff;
+      z-index: 1;
+    }
+
+    .auth-title {
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--neon-pink), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+      letter-spacing: 4px;
+    }
+
+    .auth-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+      position: relative;
+    }
+
     .form-label {
       display: block;
-      font-size: 14px;
-      font-weight: bold;
-      color: var(--text);
-      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--neon-cyan);
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
     }
+
     .form-input {
       width: 100%;
-      height: 44px;
-      padding: 0 14px;
-      font-family: inherit;
-      font-size: 15px;
-      color: var(--text);
-      background: #FFF;
-      border: 2px solid var(--border);
-      border-radius: 4px;
+      height: 52px;
+      padding: 0 18px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 8px;
       outline: none;
-      transition: all 0.2s;
+      transition: all 0.3s;
     }
+
     .form-input::placeholder {
-      color: #A1887F;
+      color: rgba(136, 146, 160, 0.5);
     }
+
     .form-input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
+      border-color: var(--neon-cyan);
+      box-shadow: var(--glow-cyan), inset 0 0 20px rgba(0, 240, 255, 0.05);
     }
+
     .form-hint {
       display: block;
       font-size: 12px;
       color: var(--text-muted);
-      margin-top: 6px;
-    }
-    .btn-primary {
-      width: 100%;
-      height: 46px;
-      font-family: inherit;
-      font-size: 16px;
-      font-weight: bold;
-      color: var(--secondary);
-      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
-      border: 2px solid var(--primary-dark);
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 2px;
-      position: relative;
-      z-index: 1;
       margin-top: 8px;
     }
-    .btn-primary:hover {
-      background: linear-gradient(180deg, #1E6E22 0%, var(--primary) 100%);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(27, 94, 32, 0.3);
+
+    .btn-primary {
+      width: 100%;
+      height: 54px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #000;
+      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      letter-spacing: 3px;
+      position: relative;
+      overflow: hidden;
+      margin-top: 8px;
     }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-primary:hover {
+      box-shadow: var(--glow-pink);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary:hover::before {
+      left: 100%;
+    }
+
     .btn-primary:active {
       transform: translateY(0);
     }
+
     .auth-footer {
       text-align: center;
-      margin-top: 24px;
-      padding-top: 20px;
-      border-top: 1px dashed var(--border);
-      position: relative;
-      z-index: 1;
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(0, 240, 255, 0.1);
     }
+
     .auth-footer p {
       font-size: 14px;
       color: var(--text-muted);
     }
+
     .auth-footer a {
-      color: var(--accent);
+      color: var(--neon-cyan);
       text-decoration: none;
-      font-weight: bold;
-      transition: color 0.2s;
+      font-weight: 600;
+      transition: all 0.3s;
     }
+
     .auth-footer a:hover {
-      color: var(--primary);
-      text-decoration: underline;
+      color: var(--neon-pink);
+      text-shadow: var(--glow-pink);
     }
+
     .alert-error {
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      background: #FFEBEE;
-      border: 1px solid #EF9A9A;
-      border-radius: 4px;
-      color: #C62828;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      background: rgba(255, 0, 100, 0.1);
+      border: 1px solid rgba(255, 0, 170, 0.3);
+      border-radius: 8px;
+      color: var(--neon-pink);
       font-size: 14px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      position: relative;
-      z-index: 1;
+      gap: 10px;
     }
+
     .alert-error svg {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       flex-shrink: 0;
     }
-    @media (max-width: 420px) {
+
+    @media (max-width: 460px) {
       .auth-card {
-        padding: 32px 24px;
+        padding: 36px 24px;
       }
       .auth-title {
-        font-size: 24px;
+        font-size: 26px;
       }
     }
   </style>
 </head>
 <body>
+  <div class="orb-2"></div>
+
   <div class="auth-container">
     <div class="auth-card">
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div>
+      <div class="corner corner-br"></div>
+
       <div class="auth-header">
         <div class="auth-icon">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
           </svg>
         </div>
-        <h1 class="auth-title">注册</h1>
+        <h1 class="auth-title">REGISTER</h1>
         <p class="auth-subtitle">加入校园二手交易平台</p>
       </div>
 
@@ -233,21 +373,21 @@
 
       <form id="registerForm" method="POST" action="/register">
         <div class="form-group">
-          <label class="form-label" for="phone">手机号</label>
+          <label class="form-label" for="phone">Phone Number</label>
           <input type="tel" class="form-input" id="phone" name="phone"
                  placeholder="请输入手机号" maxlength="11" required>
           <span class="form-hint">请输入11位手机号</span>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="password">密码</label>
+          <label class="form-label" for="password">Password</label>
           <input type="password" class="form-input" id="password" name="password"
                  placeholder="请输入密码" minlength="6" required>
           <span class="form-hint">密码长度6-18位</span>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="confirmPassword">确认密码</label>
+          <label class="form-label" for="confirmPassword">Confirm Password</label>
           <input type="password" class="form-input" id="confirmPassword" name="confirmPassword"
                  placeholder="请再次输入密码" required>
         </div>
