@@ -470,7 +470,7 @@
                 <td>
                   <% if (p.status !== 'deleted') { %>
                   <a href="javascript:void(0)" class="btn-delete"
-                     onclick="if(confirm('确定强制下架该商品？')) { fetch('/admin/products/delete/<%= p.id %>', {method:'POST'}).then(()=>location.reload()); }">强制下架</a>
+                     onclick="if(confirm('确定强制下架该商品？')) { fetch('/admin/products/delete/<%= p.id %>', {method:'POST', headers:{'x-csrf-token':'<%= csrfToken %>'}}).then(()=>location.reload()); }">强制下架</a>
                   <% } else { %>
                   <span style="color:var(--text-muted);font-size:12px;">—</span>
                   <% } %>

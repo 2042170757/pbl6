@@ -394,6 +394,7 @@
       <% } %>
 
       <form id="publish-form" action="/products/publish" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="form-group">
           <label class="form-label">商品标题 <span>*</span></label>
           <input type="text" name="title" class="form-input"

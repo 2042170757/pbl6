@@ -139,6 +139,18 @@
       letter-spacing: 1px;
     }
 
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .nav-link:hover {
+      color: var(--neon-cyan);
+    }
+
     .btn-logout:hover {
       background: rgba(255, 0, 170, 0.1);
       box-shadow: var(--glow-pink);
@@ -192,6 +204,51 @@
       transform: translateY(-2px);
     }
 
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr 180px auto;
+      gap: 14px;
+      margin-bottom: 28px;
+      padding: 18px;
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 14px;
+      backdrop-filter: blur(20px);
+    }
+
+    .toolbar input,
+    .toolbar select {
+      width: 100%;
+      height: 42px;
+      padding: 0 14px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+      color: var(--text-primary);
+      background: rgba(0, 240, 255, 0.05);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .toolbar input:focus,
+    .toolbar select:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .btn-search {
+      height: 42px;
+      padding: 0 24px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #000;
+      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      letter-spacing: 2px;
+    }
+
     .empty-state {
       text-align: center;
       padding: 80px 24px;
@@ -222,12 +279,14 @@
     }
 
     .product-card {
+      display: block;
       background: var(--bg-card);
       backdrop-filter: blur(20px);
       border: 1px solid rgba(0, 240, 255, 0.1);
       border-radius: 12px;
       overflow: hidden;
       transition: all 0.3s;
+      text-decoration: none;
     }
 
     .product-card:hover {
@@ -303,11 +362,30 @@
       opacity: 0.7;
     }
 
+    .product-meta {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
     @media (max-width: 600px) {
       .page-header {
         flex-direction: column;
         gap: 20px;
         align-items: flex-start;
+      }
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+      .navbar {
+        height: auto;
+        padding: 16px;
+        gap: 14px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .navbar-user {
+        flex-wrap: wrap;
       }
     }
   </style>
@@ -324,6 +402,11 @@
     </a>
     <div class="navbar-user">
       <span class="user-name">欢迎，<span><%= user.nickname %></span></span>
+      <% if (user.role === 'admin') { %>
+        <a href="/admin" class="nav-link">管理后台</a>
+      <% } else { %>
+        <a href="/orders" class="nav-link">我的订单</a>
+      <% } %>
       <a href="/logout" class="btn-logout">退出</a>
     </div>
   </nav>
@@ -331,8 +414,21 @@
   <div class="container">
     <div class="page-header">
       <h1 class="page-title">商品列表</h1>
-      <a href="/products/publish" class="btn-publish">+ 发布商品</a>
+      <% if (user.role === 'user') { %>
+        <a href="/products/publish" class="btn-publish">+ 发布商品</a>
+      <% } %>
     </div>
+
+    <form class="toolbar" method="GET" action="/products">
+      <input type="search" name="q" placeholder="搜索商品标题、描述或卖家"
+             value="<%= query && query.q ? query.q : '' %>">
+      <select name="sort">
+        <option value="latest" <%= !query || query.sort === 'latest' ? 'selected' : '' %>>最新发布</option>
+        <option value="price_asc" <%= query && query.sort === 'price_asc' ? 'selected' : '' %>>价格升序</option>
+        <option value="price_desc" <%= query && query.sort === 'price_desc' ? 'selected' : '' %>>价格降序</option>
+      </select>
+      <button type="submit" class="btn-search">搜索</button>
+    </form>
 
     <% if (products.length === 0) { %>
     <div class="empty-state">
@@ -340,23 +436,18 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
       </svg>
       <p>暂无商品，快来发布第一个商品吧</p>
-      <a href="/products/publish" class="btn-publish">发布商品</a>
+      <% if (user.role === 'user') { %>
+        <a href="/products/publish" class="btn-publish">发布商品</a>
+      <% } %>
     </div>
     <% } else { %>
     <div class="products-grid">
       <% products.forEach(function(p) { %>
-      <div class="product-card">
+      <a class="product-card" href="/products/<%= p.id %>">
         <div class="product-image">
-          <% if (p.images) {
-            var images = typeof p.images === 'string' ? JSON.parse(p.images) : p.images;
-            if (images.length > 0) { %>
-              <img src="<%= images[0] %>" alt="<%= p.title %>">
-            <% } else { %>
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-          </svg>
-            <% }
-          } else { %>
+          <% if (p.productImages && p.productImages.length > 0) { %>
+            <img src="<%= p.productImages[0] %>" alt="<%= p.title %>">
+          <% } else { %>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
           </svg>
@@ -365,8 +456,9 @@
         <div class="product-info">
           <h3 class="product-name"><%= p.title %></h3>
           <p class="product-price"><%= p.price %></p>
+          <p class="product-meta">卖家：<%= p.nickname %></p>
         </div>
-      </div>
+      </a>
       <% }); %>
     </div>
     <% } %>

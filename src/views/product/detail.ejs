@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= product.title %> - 校园二手交易平台</title>
+  <style>
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-card: rgba(15, 15, 25, 0.9);
+      --neon-cyan: #00f0ff;
+      --neon-pink: #ff00aa;
+      --neon-purple: #8b5cf6;
+      --neon-blue: #3b82f6;
+      --neon-green: #00ff88;
+      --text-primary: #e0e0e0;
+      --text-muted: #8892a0;
+      --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.4);
+      --glow-pink: 0 0 20px rgba(255, 0, 170, 0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+      min-height: 100vh;
+      color: var(--text-primary);
+      background: var(--bg-deep);
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .navbar {
+      height: 64px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8, 8, 15, 0.95);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+      position: relative;
+      z-index: 2;
+    }
+
+    .navbar::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-pink), transparent);
+    }
+
+    .navbar-brand,
+    .nav-link {
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      box-shadow: var(--glow-cyan);
+      color: #000;
+    }
+
+    .navbar-user {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .nav-link:hover { color: var(--neon-cyan); }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 36px 24px 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .back-link {
+      display: inline-flex;
+      margin-bottom: 24px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .back-link:hover { color: var(--neon-cyan); }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+      gap: 28px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 16px;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+    }
+
+    .gallery-main {
+      height: 440px;
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.08), rgba(139, 92, 246, 0.08));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+    }
+
+    .gallery-main img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .placeholder {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    .thumbs {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .thumb {
+      height: 88px;
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    .info-card {
+      padding: 28px;
+      position: relative;
+    }
+
+    .status {
+      display: inline-flex;
+      padding: 6px 12px;
+      margin-bottom: 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      color: var(--neon-green);
+      background: rgba(0, 255, 136, 0.12);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .status.sold {
+      color: var(--neon-pink);
+      border-color: rgba(255, 0, 170, 0.3);
+      background: rgba(255, 0, 170, 0.12);
+    }
+
+    .title {
+      font-size: 30px;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, var(--neon-cyan), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .price {
+      color: var(--neon-pink);
+      font-size: 34px;
+      font-weight: 800;
+      margin-bottom: 22px;
+      text-shadow: var(--glow-pink);
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 10px 16px;
+      padding: 18px 0;
+      border-top: 1px solid rgba(0, 240, 255, 0.1);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .meta strong {
+      color: var(--neon-cyan);
+      font-weight: 600;
+    }
+
+    .description {
+      margin-top: 22px;
+      color: var(--text-primary);
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+
+    .buy-panel {
+      margin-top: 24px;
+      padding-top: 22px;
+      border-top: 1px solid rgba(0, 240, 255, 0.1);
+    }
+
+    .panel-title {
+      margin-bottom: 16px;
+      color: var(--neon-cyan);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .form-group { margin-bottom: 14px; }
+
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      padding: 12px 14px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+      font-size: 15px;
+      color: var(--text-primary);
+      background: rgba(0, 240, 255, 0.04);
+      border: 1px solid rgba(0, 240, 255, 0.18);
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .form-textarea {
+      min-height: 84px;
+      resize: vertical;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .btn-buy {
+      width: 100%;
+      margin-top: 6px;
+      padding: 14px;
+      color: #000;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: 3px;
+      transition: all 0.3s;
+    }
+
+    .btn-buy:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .notice,
+    .error-msg {
+      padding: 13px 15px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .notice {
+      color: var(--text-muted);
+      background: rgba(0, 240, 255, 0.05);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+    }
+
+    .error-msg {
+      margin-bottom: 16px;
+      color: var(--neon-pink);
+      background: rgba(255, 0, 170, 0.1);
+      border: 1px solid rgba(255, 0, 170, 0.3);
+    }
+
+    @media (max-width: 820px) {
+      .detail-grid { grid-template-columns: 1fr; }
+      .gallery-main { height: 320px; }
+      .navbar {
+        height: auto;
+        padding: 16px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .navbar-user { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a class="navbar-brand" href="/products">
+      <span class="brand-icon">二</span>
+      <span>校园二手交易</span>
+    </a>
+    <div class="navbar-user">
+      <span><%= user.nickname %></span>
+      <% if (user.role === 'admin') { %>
+        <a href="/admin" class="nav-link">管理后台</a>
+      <% } else { %>
+        <a href="/orders" class="nav-link">我的订单</a>
+      <% } %>
+      <a href="/logout" class="nav-link">退出</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <a href="/products" class="back-link">返回商品列表</a>
+
+    <div class="detail-grid">
+      <section class="card">
+        <div class="gallery-main">
+          <% if (images && images.length > 0) { %>
+            <img src="<%= images[0] %>" alt="<%= product.title %>">
+          <% } else { %>
+            <div class="placeholder">暂无商品图片</div>
+          <% } %>
+        </div>
+        <% if (images && images.length > 1) { %>
+        <div class="thumbs">
+          <% images.forEach(function(img) { %>
+            <img class="thumb" src="<%= img %>" alt="<%= product.title %>">
+          <% }); %>
+        </div>
+        <% } %>
+      </section>
+
+      <section class="card info-card">
+        <span class="status <%= product.status === 'sold' ? 'sold' : '' %>">
+          <%= product.status === 'available' ? '在售' : '已售出' %>
+        </span>
+        <h1 class="title"><%= product.title %></h1>
+        <div class="price">¥<%= parseFloat(product.price).toFixed(2) %></div>
+
+        <div class="meta">
+          <strong>卖家</strong><span><%= product.nickname %></span>
+          <strong>联系方式</strong><span><%= product.phone %></span>
+          <strong>发布时间</strong><span><%= product.created_at ? new Date(product.created_at).toLocaleString('zh-CN') : '-' %></span>
+        </div>
+
+        <div class="description"><%= product.description || '卖家暂未填写详细描述。' %></div>
+
+        <div class="buy-panel">
+          <% if (error) { %>
+            <div class="error-msg"><%= error %></div>
+          <% } %>
+
+          <% if (user.role !== 'user') { %>
+            <div class="notice">管理员账号仅用于管理后台，不能下单购买商品。</div>
+          <% } else if (product.user_id === user.id) { %>
+            <div class="notice">这是你发布的商品，不能购买自己的商品。</div>
+          <% } else if (product.status !== 'available') { %>
+            <div class="notice">该商品已售出或已下架，暂时无法购买。</div>
+          <% } else { %>
+            <h2 class="panel-title">立即购买</h2>
+            <form method="POST" action="/products/<%= product.id %>/buy">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <div class="form-group">
+                <input class="form-input" type="text" name="receiverName" placeholder="收货人姓名" maxlength="50" required>
+              </div>
+              <div class="form-group">
+                <input class="form-input" type="tel" name="receiverPhone" placeholder="收货手机号" maxlength="11" required>
+              </div>
+              <div class="form-group">
+                <textarea class="form-textarea" name="receiverAddress" placeholder="收货地址或校内约定地点" maxlength="255" required></textarea>
+              </div>
+              <button class="btn-buy" type="submit">确认下单</button>
+            </form>
+          <% } %>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

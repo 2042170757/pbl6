@@ -372,6 +372,7 @@
       <% } %>
 
       <form id="registerForm" method="POST" action="/register">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="form-group">
           <label class="form-label" for="phone">Phone Number</label>
           <input type="tel" class="form-input" id="phone" name="phone"
