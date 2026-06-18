@@ -4,297 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>用户管理 - 校园二手交易平台</title>
+  <link rel="stylesheet" href="/css/common.css">
   <style>
-    /* 本地字体，无外部CDN依赖 */
-
-    :root {
-      --bg-deep: #0a0a0f;
-      --bg-card: rgba(15, 15, 25, 0.9);
-      --bg-sidebar: rgba(8, 8, 15, 0.95);
-      --neon-cyan: #00f0ff;
-      --neon-pink: #ff00aa;
-      --neon-purple: #8b5cf6;
-      --neon-blue: #3b82f6;
-      --text-primary: #e0e0e0;
-      --text-muted: #8892a0;
-      --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.4);
-      --glow-pink: 0 0 20px rgba(255, 0, 170, 0.4);
-    }
-
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
-      background: var(--bg-deep);
-      min-height: 100vh;
-      color: var(--text-primary);
-      position: relative;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background:
-        linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px);
-      background-size: 50px 50px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .navbar {
-      background: var(--bg-sidebar);
-      backdrop-filter: blur(20px);
-      padding: 0 24px;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
-      position: relative;
-      z-index: 10;
-    }
-
-    .navbar::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-pink), transparent);
-    }
-
-    .navbar-brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      color: var(--text-primary);
-      text-decoration: none;
-    }
-
-    .brand-icon {
-      width: 38px;
-      height: 38px;
-      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: var(--glow-cyan);
-    }
-
-    .brand-icon svg {
-      width: 20px;
-      height: 20px;
-      color: #000;
-    }
-
-    .brand-text {
-      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      background: linear-gradient(90deg, var(--neon-cyan), #fff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .navbar-user {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .user-name {
-      color: var(--text-muted);
-      font-size: 15px;
-      font-weight: 500;
-    }
-
-    .btn-logout {
-      padding: 8px 20px;
-      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--neon-pink);
-      background: transparent;
-      border: 1px solid var(--neon-pink);
-      border-radius: 6px;
-      text-decoration: none;
-      transition: all 0.3s;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .btn-logout:hover {
-      background: rgba(255, 0, 170, 0.1);
-      box-shadow: var(--glow-pink);
-    }
-
-    .layout {
-      display: flex;
-      min-height: calc(100vh - 64px);
-      position: relative;
-      z-index: 1;
-    }
-
-    .sidebar {
-      width: 240px;
-      background: var(--bg-sidebar);
-      border-right: 1px solid rgba(0, 240, 255, 0.1);
-      padding: 24px 0;
-      flex-shrink: 0;
-    }
-
-    .sidebar-nav {
-      list-style: none;
-    }
-
-    .sidebar-item {
-      margin-bottom: 4px;
-    }
-
-    .sidebar-link {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 24px;
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 15px;
-      font-weight: 500;
-      transition: all 0.3s;
-      border-left: 3px solid transparent;
-    }
-
-    .sidebar-link:hover {
-      background: rgba(0, 240, 255, 0.05);
-      color: var(--neon-cyan);
-    }
-
-    .sidebar-link.active {
-      background: rgba(0, 240, 255, 0.1);
-      color: var(--neon-cyan);
-      border-left-color: var(--neon-cyan);
-    }
-
-    .sidebar-link.active::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 3px;
-      background: var(--neon-cyan);
-      box-shadow: var(--glow-cyan);
-    }
-
-    .sidebar-link svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .main {
-      flex: 1;
-      padding: 32px;
-      overflow-y: auto;
-    }
-
     .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       margin-bottom: 28px;
       padding-bottom: 20px;
-      border-bottom: 1px solid rgba(0, 240, 255, 0.1);
     }
 
     .page-title {
-      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
       font-size: 26px;
-      font-weight: 700;
-      background: linear-gradient(90deg, var(--neon-cyan), #fff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
       margin-bottom: 6px;
     }
 
     .page-subtitle {
       font-size: 14px;
-      color: var(--text-muted);
-    }
-
-    .btn-back {
-      padding: 10px 20px;
-      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--neon-cyan);
-      background: transparent;
-      border: 1px solid var(--neon-cyan);
-      border-radius: 6px;
-      text-decoration: none;
-      transition: all 0.3s;
-    }
-
-    .btn-back:hover {
-      background: rgba(0, 240, 255, 0.1);
-      box-shadow: var(--glow-cyan);
-    }
-
-    .table-card {
-      background: var(--bg-card);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(0, 240, 255, 0.15);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .table thead {
-      background: rgba(0, 240, 255, 0.05);
-    }
-
-    .table thead th {
-      padding: 16px 20px;
-      text-align: left;
-      color: var(--neon-cyan);
-      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      border-bottom: 1px solid rgba(0, 240, 255, 0.1);
-    }
-
-    .table tbody td {
-      padding: 16px 20px;
-      border-bottom: 1px solid rgba(0, 240, 255, 0.08);
-      font-size: 15px;
-      color: var(--text-primary);
-    }
-
-    .table tbody tr:hover {
-      background: rgba(0, 240, 255, 0.03);
-    }
-
-    .table tbody tr:last-child td {
-      border-bottom: none;
     }
 
     .phone-cell {
@@ -324,34 +47,17 @@
     }
 
     .empty-state {
-      text-align: center;
       padding: 60px 24px;
-      color: var(--text-muted);
-    }
-
-    .empty-state svg {
-      width: 56px;
-      height: 56px;
-      margin-bottom: 16px;
-      opacity: 0.4;
     }
 
     @media (max-width: 768px) {
-      .sidebar {
-        display: none;
-      }
-      .main {
-        padding: 24px 16px;
-      }
       .page-header {
-        flex-direction: column;
-        gap: 16px;
-        align-items: flex-start;
+        margin-bottom: 24px;
       }
     }
   </style>
 </head>
-<body>
+<body class="admin-page">
   <nav class="navbar">
     <a class="navbar-brand" href="/admin">
       <div class="brand-icon">
