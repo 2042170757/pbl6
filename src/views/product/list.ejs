@@ -278,6 +278,21 @@
       gap: 24px;
     }
 
+    .result-summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .result-summary strong {
+      color: var(--neon-cyan);
+      font-weight: 600;
+    }
+
     .product-card {
       display: block;
       background: var(--bg-card);
@@ -368,6 +383,53 @@
       margin-top: 8px;
     }
 
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 36px;
+    }
+
+    .pagination-link,
+    .pagination-current {
+      min-width: 42px;
+      height: 42px;
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .pagination-link {
+      color: var(--text-primary);
+      background: rgba(0, 240, 255, 0.05);
+      border: 1px solid rgba(0, 240, 255, 0.18);
+    }
+
+    .pagination-link:hover {
+      color: var(--neon-cyan);
+      border-color: var(--neon-cyan);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .pagination-current {
+      color: #000;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+      border: 1px solid transparent;
+    }
+
+    .pagination-info {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
     @media (max-width: 600px) {
       .page-header {
         flex-direction: column;
@@ -387,10 +449,25 @@
       .navbar-user {
         flex-wrap: wrap;
       }
+      .result-summary {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
   </style>
 </head>
 <body>
+  <%
+    const currentQuery = query || {};
+    const paginationData = pagination || {};
+    const buildPageUrl = (pageNumber) => {
+      const params = new URLSearchParams();
+      if (currentQuery.q) params.set('q', currentQuery.q);
+      if (currentQuery.sort && currentQuery.sort !== 'latest') params.set('sort', currentQuery.sort);
+      params.set('page', String(pageNumber));
+      return '/products?' + params.toString();
+    };
+  %>
   <nav class="navbar">
     <a class="navbar-brand" href="/">
       <div class="brand-icon">
@@ -430,6 +507,11 @@
       <button type="submit" class="btn-search">搜索</button>
     </form>
 
+    <div class="result-summary">
+      <span>共找到 <strong><%= paginationData.totalItems || 0 %></strong> 件商品</span>
+      <span>第 <strong><%= paginationData.currentPage || 1 %></strong> / <strong><%= paginationData.totalPages || 1 %></strong> 页</span>
+    </div>
+
     <% if (products.length === 0) { %>
     <div class="empty-state">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
@@ -461,6 +543,35 @@
       </a>
       <% }); %>
     </div>
+
+    <% if ((paginationData.totalPages || 1) > 1) { %>
+    <nav class="pagination" aria-label="商品列表分页">
+      <% if (paginationData.hasPrev) { %>
+        <a class="pagination-link" href="<%= buildPageUrl(paginationData.currentPage - 1) %>">上一页</a>
+      <% } %>
+
+      <% for (let pageNumber = 1; pageNumber <= paginationData.totalPages; pageNumber += 1) { %>
+        <% if (pageNumber === paginationData.currentPage) { %>
+          <span class="pagination-current"><%= pageNumber %></span>
+        <% } else if (
+          pageNumber === 1 ||
+          pageNumber === paginationData.totalPages ||
+          Math.abs(pageNumber - paginationData.currentPage) <= 1
+        ) { %>
+          <a class="pagination-link" href="<%= buildPageUrl(pageNumber) %>"><%= pageNumber %></a>
+        <% } else if (
+          pageNumber === paginationData.currentPage - 2 ||
+          pageNumber === paginationData.currentPage + 2
+        ) { %>
+          <span class="pagination-info">...</span>
+        <% } %>
+      <% } %>
+
+      <% if (paginationData.hasNext) { %>
+        <a class="pagination-link" href="<%= buildPageUrl(paginationData.currentPage + 1) %>">下一页</a>
+      <% } %>
+    </nav>
+    <% } %>
     <% } %>
   </div>
 </body>

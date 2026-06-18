@@ -7,28 +7,45 @@ async function listProducts(req, res) {
     const pool = getPool();
     const keyword = (req.query.q || '').trim();
     const sort = req.query.sort || 'latest';
+    const page = Math.max(Number.parseInt(req.query.page, 10) || 1, 1);
+    const pageSize = 12;
     const sortMap = {
       latest: 'products.created_at DESC',
       price_asc: 'products.price ASC',
       price_desc: 'products.price DESC'
     };
     const orderBy = sortMap[sort] || sortMap.latest;
-    const params = [];
+    const filterParams = [];
     let where = "products.status = 'available'";
 
     if (keyword) {
       where += " AND (products.title LIKE ? OR products.description LIKE ? OR users.nickname LIKE ?)";
       const like = `%${keyword}%`;
-      params.push(like, like, like);
+      filterParams.push(like, like, like);
     }
+
+    const [countRows] = await pool.execute(
+      `SELECT COUNT(*) AS total
+       FROM products
+       JOIN users ON products.user_id = users.id
+       WHERE ${where}`,
+      filterParams
+    );
+
+    const totalItems = countRows[0].total;
+    const totalPages = Math.max(Math.ceil(totalItems / pageSize), 1);
+    const currentPage = Math.min(page, totalPages);
+    const offset = (currentPage - 1) * pageSize;
+    const queryParams = [...filterParams, pageSize, offset];
 
     const [products] = await pool.execute(
       `SELECT products.*, users.nickname
        FROM products
        JOIN users ON products.user_id = users.id
        WHERE ${where}
-       ORDER BY ${orderBy}`,
-      params
+       ORDER BY ${orderBy}
+       LIMIT ? OFFSET ?`,
+      queryParams
     );
 
     const normalizedProducts = products.map(product => ({
@@ -39,14 +56,30 @@ async function listProducts(req, res) {
     return res.render('product/list', {
       user: req.session.user,
       products: normalizedProducts,
-      query: { q: keyword, sort }
+      query: { q: keyword, sort, page: currentPage },
+      pagination: {
+        currentPage,
+        pageSize,
+        totalItems,
+        totalPages,
+        hasPrev: currentPage > 1,
+        hasNext: currentPage < totalPages
+      }
     });
   } catch (err) {
     console.error(err);
     return res.render('product/list', {
       user: req.session.user,
       products: [],
-      query: { q: '', sort: 'latest' }
+      query: { q: '', sort: 'latest', page: 1 },
+      pagination: {
+        currentPage: 1,
+        pageSize: 12,
+        totalItems: 0,
+        totalPages: 1,
+        hasPrev: false,
+        hasNext: false
+      }
     });
   }
 }
