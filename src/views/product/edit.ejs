@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>编辑商品 - 校园二手交易平台</title>
+  <style>
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-card: rgba(15, 15, 25, 0.9);
+      --neon-cyan: #00f0ff;
+      --neon-pink: #ff00aa;
+      --neon-purple: #8b5cf6;
+      --neon-blue: #3b82f6;
+      --text-primary: #e0e0e0;
+      --text-muted: #8892a0;
+      --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.4);
+      --glow-pink: 0 0 20px rgba(255, 0, 170, 0.4);
+    }
+
+    *,
+    *::before,
+    *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+      background: var(--bg-deep);
+      min-height: 100vh;
+      color: var(--text-primary);
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .navbar {
+      background: rgba(8, 8, 15, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+      position: relative;
+      z-index: 10;
+    }
+
+    .navbar::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-pink), transparent);
+    }
+
+    .navbar-brand { display: flex; align-items: center; gap: 14px; color: var(--text-primary); text-decoration: none; }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--glow-cyan);
+      color: #000;
+      font-weight: 800;
+    }
+
+    .brand-text {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, var(--neon-cyan), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .navbar-user {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .nav-link:hover { color: var(--neon-cyan); }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-header {
+      margin-bottom: 30px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+    }
+
+    .page-title {
+      font-size: 30px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, var(--neon-cyan), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 2px;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      color: var(--neon-cyan);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .btn-back:hover {
+      background: rgba(0, 240, 255, 0.08);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .form-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 16px;
+      padding: 30px;
+    }
+
+    .error-msg {
+      background: rgba(255, 0, 170, 0.1);
+      border: 1px solid rgba(255, 0, 170, 0.3);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: var(--neon-pink);
+      font-size: 14px;
+      margin-bottom: 22px;
+    }
+
+    .form-group { margin-bottom: 24px; }
+
+    .form-label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .form-label span { color: var(--neon-pink); }
+
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+      font-size: 15px;
+      color: var(--text-primary);
+      background: rgba(0, 240, 255, 0.04);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 8px;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .form-textarea {
+      min-height: 130px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .price-input-wrap {
+      position: relative;
+    }
+
+    .price-input-wrap .form-input {
+      padding-left: 36px;
+    }
+
+    .price-prefix {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--neon-cyan);
+    }
+
+    .form-hint {
+      display: block;
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .image-board {
+      display: grid;
+      gap: 16px;
+    }
+
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 14px;
+    }
+
+    .image-card {
+      background: rgba(0, 240, 255, 0.04);
+      border: 1px solid rgba(0, 240, 255, 0.12);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .image-card img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .image-card label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .image-card input[type="checkbox"] {
+      accent-color: var(--neon-pink);
+      width: 16px;
+      height: 16px;
+    }
+
+    .upload-area {
+      border: 2px dashed rgba(0, 240, 255, 0.2);
+      border-radius: 12px;
+      padding: 26px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: rgba(0, 240, 255, 0.02);
+    }
+
+    .upload-area:hover,
+    .upload-area.dragover {
+      border-color: var(--neon-cyan);
+      background: rgba(0, 240, 255, 0.05);
+    }
+
+    .upload-area svg {
+      width: 42px;
+      height: 42px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+
+    .upload-area p { color: var(--text-muted); font-size: 14px; }
+    .upload-area .hint { font-size: 12px; margin-top: 6px; }
+
+    #file-input { display: none; }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .preview-item {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      aspect-ratio: 1;
+    }
+
+    .preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .preview-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 24px;
+      height: 24px;
+      background: rgba(255, 0, 170, 0.92);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .preview-remove:hover { background: var(--neon-pink); }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 800;
+      color: #000;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      letter-spacing: 3px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    @media (max-width: 640px) {
+      .navbar {
+        height: auto;
+        padding: 16px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .container {
+        padding: 28px 16px 48px;
+      }
+
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .form-card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a class="navbar-brand" href="/products">
+      <span class="brand-icon">二</span>
+      <span class="brand-text">校园二手交易</span>
+    </a>
+    <div class="navbar-user">
+      <span><%= user.nickname %></span>
+      <a href="/orders" class="nav-link">我的订单</a>
+      <a href="/profile" class="nav-link">我的资料</a>
+      <a href="/logout" class="nav-link">退出</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">编辑商品</h1>
+        <p class="page-subtitle">修改商品标题、描述、价格和展示图片。只有商品所有者才能编辑，图片总数最多 6 张。</p>
+      </div>
+      <a href="/products/<%= product.id %>" class="btn-back">返回商品详情</a>
+    </div>
+
+    <div class="form-card">
+      <% if (error) { %>
+      <div class="error-msg"><%= error %></div>
+      <% } %>
+
+      <form id="edit-form" action="/products/<%= product.id %>/edit" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <div class="form-group">
+          <label class="form-label" for="title-input">商品标题 <span>*</span></label>
+          <input type="text" name="title" class="form-input" id="title-input"
+                 maxlength="100" required value="<%= form.title %>">
+          <span class="form-hint">最多100个字符</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="desc-input">商品描述</label>
+          <textarea name="description" class="form-textarea" id="desc-input"
+                    maxlength="500"><%= form.description %></textarea>
+          <span class="form-hint">最多500个字符</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="price-input">价格（元）<span>*</span></label>
+          <div class="price-input-wrap">
+            <span class="price-prefix">¥</span>
+            <input type="number" name="price" class="form-input" id="price-input"
+                   min="0.01" step="0.01" required value="<%= form.price %>">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">当前图片</label>
+          <div class="image-board">
+            <% if (product.currentImages && product.currentImages.length > 0) { %>
+              <div class="image-grid">
+                <% product.currentImages.forEach(function(imagePath) { %>
+                  <div class="image-card">
+                    <img src="<%= imagePath %>" alt="<%= product.title %>">
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="keepImages"
+                        value="<%= imagePath %>"
+                        <%= form.keepImages.includes(imagePath) ? 'checked' : '' %>>
+                      保留这张图片
+                    </label>
+                  </div>
+                <% }); %>
+              </div>
+            <% } else { %>
+              <span class="form-hint">当前商品没有图片，请至少上传1张新图片。</span>
+            <% } %>
+            <span class="form-hint">取消勾选表示保存时删除对应图片。</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">新增图片</label>
+          <div class="upload-area" id="upload-area">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <p>点击或拖拽上传新图片</p>
+            <p class="hint">支持 JPG、PNG 格式，单张不超过 5MB</p>
+          </div>
+          <input type="file" id="file-input" name="images" multiple accept="image/jpeg,image/png">
+          <div class="preview-grid" id="preview-grid"></div>
+          <span class="form-hint" id="img-count-hint">保留图片与新增图片总数最多 6 张。</span>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submit-btn">保存商品</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    var MAX_IMAGES = 6;
+    var selectedFiles = [];
+    var uploadArea = document.getElementById('upload-area');
+    var fileInput = document.getElementById('file-input');
+    var previewGrid = document.getElementById('preview-grid');
+    var imgCountHint = document.getElementById('img-count-hint');
+    var form = document.getElementById('edit-form');
+    var submitBtn = document.getElementById('submit-btn');
+
+    function getCheckedCount() {
+      return document.querySelectorAll('input[name="keepImages"]:checked').length;
+    }
+
+    function syncFiles() {
+      var dt = new DataTransfer();
+      selectedFiles.forEach(function(file) { dt.items.add(file); });
+      fileInput.files = dt.files;
+      updatePreview();
+      updateHint();
+    }
+
+    function updatePreview() {
+      previewGrid.innerHTML = '';
+      selectedFiles.forEach(function(file, index) {
+        var div = document.createElement('div');
+        div.className = 'preview-item';
+
+        var img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'preview-remove';
+        btn.textContent = '×';
+        btn.onclick = function() {
+          selectedFiles.splice(index, 1);
+          syncFiles();
+        };
+
+        div.appendChild(img);
+        div.appendChild(btn);
+        previewGrid.appendChild(div);
+      });
+    }
+
+    function updateHint() {
+      var kept = getCheckedCount();
+      var total = kept + selectedFiles.length;
+      imgCountHint.textContent = '当前保留 ' + kept + ' 张，新增 ' + selectedFiles.length + ' 张，总计 ' + total + ' / ' + MAX_IMAGES + ' 张。';
+    }
+
+    function handleFiles(files) {
+      var kept = getCheckedCount();
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        if (!/^image\/(jpeg|png)$/.test(file.type)) continue;
+        if (file.size > 5 * 1024 * 1024) continue;
+        if (kept + selectedFiles.length >= MAX_IMAGES) break;
+        selectedFiles.push(file);
+      }
+      syncFiles();
+    }
+
+    uploadArea.addEventListener('click', function() { fileInput.click(); });
+
+    uploadArea.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', function() {
+      uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', function() {
+      handleFiles(fileInput.files);
+    });
+
+    document.querySelectorAll('input[name="keepImages"]').forEach(function(checkbox) {
+      checkbox.addEventListener('change', function() {
+        var allowedNewCount = MAX_IMAGES - getCheckedCount();
+        if (selectedFiles.length > allowedNewCount) {
+          selectedFiles = selectedFiles.slice(0, Math.max(allowedNewCount, 0));
+          syncFiles();
+          return;
+        }
+        updateHint();
+      });
+    });
+
+    form.addEventListener('submit', function(e) {
+      var title = document.getElementById('title-input').value.trim();
+      var price = document.getElementById('price-input').value;
+      var totalImages = getCheckedCount() + selectedFiles.length;
+      var err = null;
+
+      if (!title) err = '请填写商品标题';
+      else if (price === '' || parseFloat(price) <= 0) err = '请填写有效的价格';
+      else if (totalImages === 0) err = '请至少保留或上传1张商品图片';
+      else if (totalImages > MAX_IMAGES) err = '商品图片最多6张';
+
+      if (err) {
+        e.preventDefault();
+        var card = document.querySelector('.form-card');
+        var existing = card.querySelector('.error-msg');
+        if (existing) existing.remove();
+        var msg = document.createElement('div');
+        msg.className = 'error-msg';
+        msg.textContent = err;
+        card.insertBefore(msg, card.firstChild);
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = '正在保存...';
+    });
+
+    updateHint();
+  </script>
+</body>
+</html>

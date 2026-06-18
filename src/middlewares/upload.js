@@ -40,7 +40,26 @@ function cleanupUploadedFiles(files = []) {
   });
 }
 
+function cleanupImagePaths(imagePaths = []) {
+  imagePaths.forEach(imagePath => {
+    if (typeof imagePath !== 'string' || !imagePath.startsWith('/uploads/')) {
+      return;
+    }
+
+    const filename = imagePath.slice('/uploads/'.length);
+    if (!filename) {
+      return;
+    }
+
+    const absolutePath = path.join(uploadsDir, filename);
+    if (fs.existsSync(absolutePath)) {
+      fs.unlink(absolutePath, () => {});
+    }
+  });
+}
+
 module.exports = {
   upload,
-  cleanupUploadedFiles
+  cleanupUploadedFiles,
+  cleanupImagePaths
 };

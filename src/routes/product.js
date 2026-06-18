@@ -3,6 +3,8 @@ const {
   listProducts,
   showPublishForm,
   publishProduct,
+  showEditProductForm,
+  updateProduct,
   showProductDetail,
   buyProduct
 } = require('../controllers/productController');
@@ -15,6 +17,8 @@ const router = express.Router();
 router.get('/products', requireLogin, listProducts);
 router.get('/products/publish', requireUser, showPublishForm);
 router.post('/products/publish', requireUser, upload.array('images', 6), validateUploadCsrf, publishProduct);
+router.get('/products/:id/edit', requireUser, showEditProductForm);
+router.post('/products/:id/edit', requireUser, upload.array('images', 6), validateUploadCsrf, updateProduct);
 router.get('/products/:id', requireLogin, showProductDetail);
 router.post('/products/:id/buy', requireUser, buyProduct);
 

@@ -1,6 +1,63 @@
 const { getPool } = require('../services/databaseService');
-const { cleanupUploadedFiles } = require('../middlewares/upload');
+const { cleanupUploadedFiles, cleanupImagePaths } = require('../middlewares/upload');
 const { parseImages } = require('../utils/images');
+
+function normalizeImageSelections(value) {
+  if (Array.isArray(value)) {
+    return value.filter(item => typeof item === 'string' && item.trim());
+  }
+
+  if (typeof value === 'string' && value.trim()) {
+    return [value.trim()];
+  }
+
+  return [];
+}
+
+function buildProductEditViewModel(user, product, overrides = {}) {
+  const currentImages = overrides.currentImages || parseImages(product.images);
+  const keptImages = overrides.keptImages || currentImages;
+
+  return {
+    user,
+    product: {
+      ...product,
+      currentImages
+    },
+    form: {
+      title: Object.prototype.hasOwnProperty.call(overrides, 'title') ? overrides.title : (product.title || ''),
+      description: Object.prototype.hasOwnProperty.call(overrides, 'description')
+        ? overrides.description
+        : (product.description || ''),
+      price: Object.prototype.hasOwnProperty.call(overrides, 'price') ? overrides.price : product.price,
+      keepImages: keptImages
+    },
+    error: overrides.error || null
+  };
+}
+
+async function findOwnedProductForEdit(productId, userId) {
+  const pool = getPool();
+  const [products] = await pool.execute(
+    'SELECT * FROM products WHERE id = ? LIMIT 1',
+    [productId]
+  );
+
+  if (products.length === 0 || products[0].status === 'deleted') {
+    return { state: 'not_found', product: null };
+  }
+
+  const product = products[0];
+  if (product.user_id !== userId) {
+    return { state: 'forbidden', product };
+  }
+
+  if (product.status !== 'available') {
+    return { state: 'locked', product };
+  }
+
+  return { state: 'ok', product };
+}
 
 async function listProducts(req, res) {
   try {
@@ -149,11 +206,193 @@ async function showProductDetail(req, res) {
       user: req.session.user,
       product,
       images: parseImages(product.images),
-      error: req.query.error || null
+      error: req.query.error || null,
+      success: req.query.success || null
     });
   } catch (err) {
     console.error(err);
     return res.status(500).send('商品详情加载失败');
+  }
+}
+
+async function showEditProductForm(req, res) {
+  try {
+    const productId = Number.parseInt(req.params.id, 10);
+    if (!Number.isInteger(productId) || productId <= 0) {
+      return res.redirect('/products');
+    }
+
+    const result = await findOwnedProductForEdit(productId, req.session.user.id);
+
+    if (result.state === 'not_found') {
+      return res.status(404).render('error', {
+        title: '商品不存在',
+        statusCode: 404,
+        message: '你要编辑的商品不存在，或已被删除。'
+      });
+    }
+
+    if (result.state === 'forbidden') {
+      return res.status(403).render('error', {
+        title: '无权编辑',
+        statusCode: 403,
+        message: '只能编辑自己发布的商品。'
+      });
+    }
+
+    if (result.state === 'locked') {
+      return res.redirect(`/products/${productId}?error=${encodeURIComponent('商品已售出，暂不支持编辑')}`);
+    }
+
+    return res.render('product/edit', buildProductEditViewModel(req.session.user, result.product));
+  } catch (err) {
+    console.error(err);
+    return res.status(500).render('error', {
+      title: '编辑页加载失败',
+      statusCode: 500,
+      message: '商品编辑页加载失败，请稍后重试。'
+    });
+  }
+}
+
+async function updateProduct(req, res) {
+  const uploadedFiles = req.files || [];
+
+  try {
+    const productId = Number.parseInt(req.params.id, 10);
+    if (!Number.isInteger(productId) || productId <= 0) {
+      cleanupUploadedFiles(uploadedFiles);
+      return res.redirect('/products');
+    }
+
+    const result = await findOwnedProductForEdit(productId, req.session.user.id);
+
+    if (result.state === 'not_found') {
+      cleanupUploadedFiles(uploadedFiles);
+      return res.status(404).render('error', {
+        title: '商品不存在',
+        statusCode: 404,
+        message: '你要编辑的商品不存在，或已被删除。'
+      });
+    }
+
+    if (result.state === 'forbidden') {
+      cleanupUploadedFiles(uploadedFiles);
+      return res.status(403).render('error', {
+        title: '无权编辑',
+        statusCode: 403,
+        message: '只能编辑自己发布的商品。'
+      });
+    }
+
+    if (result.state === 'locked') {
+      cleanupUploadedFiles(uploadedFiles);
+      return res.redirect(`/products/${productId}?error=${encodeURIComponent('商品已售出，暂不支持编辑')}`);
+    }
+
+    const product = result.product;
+    const currentImages = parseImages(product.images);
+    const requestedKeepImages = normalizeImageSelections(req.body.keepImages);
+    const keptImages = currentImages.filter(image => requestedKeepImages.includes(image));
+    const title = (req.body.title || '').trim();
+    const description = (req.body.description || '').trim();
+    const price = (req.body.price || '').trim();
+    const priceValue = Number(price);
+
+    if (!title) {
+      cleanupUploadedFiles(uploadedFiles);
+      return res.render('product/edit', buildProductEditViewModel(req.session.user, product, {
+        currentImages,
+        keptImages,
+        title,
+        description,
+        price,
+        error: '请填写商品标题'
+      }));
+    }
+
+    if (title.length > 100) {
+      cleanupUploadedFiles(uploadedFiles);
+      return res.render('product/edit', buildProductEditViewModel(req.session.user, product, {
+        currentImages,
+        keptImages,
+        title,
+        description,
+        price,
+        error: '商品标题最多100个字符'
+      }));
+    }
+
+    if (description.length > 500) {
+      cleanupUploadedFiles(uploadedFiles);
+      return res.render('product/edit', buildProductEditViewModel(req.session.user, product, {
+        currentImages,
+        keptImages,
+        title,
+        description,
+        price,
+        error: '商品描述最多500个字符'
+      }));
+    }
+
+    if (!Number.isFinite(priceValue) || priceValue <= 0) {
+      cleanupUploadedFiles(uploadedFiles);
+      return res.render('product/edit', buildProductEditViewModel(req.session.user, product, {
+        currentImages,
+        keptImages,
+        title,
+        description,
+        price,
+        error: '请填写有效的价格'
+      }));
+    }
+
+    const newImagePaths = uploadedFiles.map(file => '/uploads/' + file.filename);
+    const finalImages = [...keptImages, ...newImagePaths];
+
+    if (finalImages.length === 0) {
+      cleanupUploadedFiles(uploadedFiles);
+      return res.render('product/edit', buildProductEditViewModel(req.session.user, product, {
+        currentImages,
+        keptImages,
+        title,
+        description,
+        price,
+        error: '请至少保留或上传1张商品图片'
+      }));
+    }
+
+    if (finalImages.length > 6) {
+      cleanupUploadedFiles(uploadedFiles);
+      return res.render('product/edit', buildProductEditViewModel(req.session.user, product, {
+        currentImages,
+        keptImages,
+        title,
+        description,
+        price,
+        error: '商品图片最多6张'
+      }));
+    }
+
+    await getPool().execute(
+      `UPDATE products
+       SET title = ?, description = ?, price = ?, images = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ? AND user_id = ?`,
+      [title, description, priceValue, JSON.stringify(finalImages), productId, req.session.user.id]
+    );
+
+    const removedImages = currentImages.filter(image => !keptImages.includes(image));
+    cleanupImagePaths(removedImages);
+
+    return res.redirect(`/products/${productId}?success=${encodeURIComponent('商品更新成功')}`);
+  } catch (err) {
+    cleanupUploadedFiles(uploadedFiles);
+    console.error(err);
+    return res.status(500).render('error', {
+      title: '商品更新失败',
+      statusCode: 500,
+      message: '商品更新失败，请稍后重试。'
+    });
   }
 }
 
@@ -220,6 +459,8 @@ module.exports = {
   listProducts,
   showPublishForm,
   publishProduct,
+  showEditProductForm,
+  updateProduct,
   showProductDetail,
   buyProduct
 };
