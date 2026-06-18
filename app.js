@@ -11,6 +11,9 @@ const sessionConfig = require('./src/config/session');
 const app = express();
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
+const ADMIN_PHONE = (process.env.ADMIN_PHONE || '').trim();
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+const ADMIN_NICKNAME = (process.env.ADMIN_NICKNAME || '管理员').trim() || '管理员';
 
 function requireLogin(req, res, next) {
   if (!req.session.user) {
@@ -89,6 +92,29 @@ async function ensureColumn(table, column, definition) {
   if (rows[0].count === 0) {
     await pool.execute(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
   }
+}
+
+async function ensureAdminUser() {
+  if (!ADMIN_PHONE || !ADMIN_PASSWORD) {
+    console.warn('Admin bootstrap skipped: ADMIN_PHONE or ADMIN_PASSWORD is not configured.');
+    return;
+  }
+
+  const [admins] = await pool.execute(
+    "SELECT id FROM users WHERE phone = ?",
+    [ADMIN_PHONE]
+  );
+
+  if (admins.length > 0) {
+    return;
+  }
+
+  const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
+  await pool.execute(
+    "INSERT INTO users (phone, password, nickname, role) VALUES (?, ?, ?, ?)",
+    [ADMIN_PHONE, hashedPassword, ADMIN_NICKNAME, 'admin']
+  );
+  console.log(`Admin account initialized for phone ${ADMIN_PHONE}`);
 }
 
 // Ensure uploads directory exists
@@ -193,14 +219,7 @@ async function initDB() {
   await ensureColumn('orders', 'receiver_address', 'VARCHAR(255)');
   await ensureColumn('orders', 'updated_at', 'DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
 
-  const [admins] = await pool.execute("SELECT * FROM users WHERE phone = '17359050190'");
-  if (admins.length === 0) {
-    const hashedPassword = await bcrypt.hash('123456', 10);
-    await pool.execute(
-      "INSERT INTO users (phone, password, nickname, role) VALUES (?, ?, ?, ?)",
-      ['17359050190', hashedPassword, '管理员', 'admin']
-    );
-  }
+  await ensureAdminUser();
 }
 // Start server after DB init
 initDB()
