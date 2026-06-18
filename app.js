@@ -14,6 +14,12 @@ const bcrypt = require('bcryptjs');
 const ADMIN_PHONE = (process.env.ADMIN_PHONE || '').trim();
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const ADMIN_NICKNAME = (process.env.ADMIN_NICKNAME || '管理员').trim() || '管理员';
+const LOGIN_RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const LOGIN_RATE_LIMIT_MAX_ATTEMPTS = 5;
+const LOGIN_FAILURE_LOCK_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_FAILURE_LOCK_MAX_ATTEMPTS = 5;
+const loginRequests = new Map();
+const loginFailures = new Map();
 
 function requireLogin(req, res, next) {
   if (!req.session.user) {
@@ -53,6 +59,81 @@ function cleanupUploadedFiles(files = []) {
       fs.unlink(file.path, () => {});
     }
   });
+}
+
+function getClientIp(req) {
+  return req.ip || req.connection?.remoteAddress || 'unknown';
+}
+
+function getLoginFailureEntry(ip) {
+  const entry = loginFailures.get(ip);
+  if (!entry) {
+    return null;
+  }
+
+  if (entry.lockUntil && entry.lockUntil <= Date.now()) {
+    loginFailures.delete(ip);
+    return null;
+  }
+
+  return entry;
+}
+
+function clearLoginFailures(ip) {
+  loginFailures.delete(ip);
+}
+
+function clearLoginRequests(ip) {
+  loginRequests.delete(ip);
+}
+
+function cleanupLoginRequestEntry(ip) {
+  const entry = loginRequests.get(ip);
+  if (!entry) {
+    return null;
+  }
+
+  const now = Date.now();
+  entry.timestamps = entry.timestamps.filter(timestamp => now - timestamp < LOGIN_RATE_LIMIT_WINDOW_MS);
+
+  if (entry.timestamps.length === 0) {
+    loginRequests.delete(ip);
+    return null;
+  }
+
+  return entry;
+}
+
+function recordLoginRequest(ip) {
+  const now = Date.now();
+  const entry = cleanupLoginRequestEntry(ip) || { timestamps: [] };
+  entry.timestamps.push(now);
+  loginRequests.set(ip, entry);
+  return entry;
+}
+
+function getRateLimitMessage() {
+  return '登录请求过于频繁，请 1 分钟后再试';
+}
+
+function recordLoginFailure(ip) {
+  const now = Date.now();
+  const entry = getLoginFailureEntry(ip);
+  const nextEntry = entry && now - entry.firstFailureAt <= LOGIN_FAILURE_LOCK_WINDOW_MS
+    ? { ...entry, count: entry.count + 1 }
+    : { count: 1, firstFailureAt: now, lockUntil: null };
+
+  if (nextEntry.count >= LOGIN_FAILURE_LOCK_MAX_ATTEMPTS) {
+    nextEntry.lockUntil = now + LOGIN_FAILURE_LOCK_WINDOW_MS;
+  }
+
+  loginFailures.set(ip, nextEntry);
+  return nextEntry;
+}
+
+function getLockedUntilMessage(lockUntil) {
+  const remainingMinutes = Math.max(1, Math.ceil((lockUntil - Date.now()) / 60000));
+  return `登录失败次数过多，请 ${remainingMinutes} 分钟后再试`;
 }
 
 function ensureCsrfToken(req, res, next) {
@@ -115,6 +196,29 @@ async function ensureAdminUser() {
     [ADMIN_PHONE, hashedPassword, ADMIN_NICKNAME, 'admin']
   );
   console.log(`Admin account initialized for phone ${ADMIN_PHONE}`);
+}
+
+function loginRateLimiter(req, res, next) {
+  const clientIp = getClientIp(req);
+  const lockedEntry = getLoginFailureEntry(clientIp);
+
+  if (lockedEntry?.lockUntil) {
+    return res.status(429).render('user/login', {
+      error: getLockedUntilMessage(lockedEntry.lockUntil),
+      phone: req.body?.phone || ''
+    });
+  }
+
+  const entry = recordLoginRequest(clientIp);
+
+  if (entry.timestamps.length > LOGIN_RATE_LIMIT_MAX_ATTEMPTS) {
+    return res.status(429).render('user/login', {
+      error: getRateLimitMessage(),
+      phone: req.body?.phone || ''
+    });
+  }
+
+  next();
 }
 
 // Ensure uploads directory exists
@@ -309,9 +413,18 @@ app.get('/login', (req, res) => {
   res.render('user/login', { error: null, phone: '' });
 });
 
-app.post('/login', async (req, res) => {
+app.post('/login', loginRateLimiter, async (req, res) => {
   try {
     const { phone, password, remember } = req.body;
+    const clientIp = getClientIp(req);
+    const lockedEntry = getLoginFailureEntry(clientIp);
+
+    if (lockedEntry?.lockUntil) {
+      return res.status(429).render('user/login', {
+        error: getLockedUntilMessage(lockedEntry.lockUntil),
+        phone: phone || ''
+      });
+    }
     
     if (!phone || !password) {
       return res.render('user/login', { error: '请填写手机号和密码', phone: '' });
@@ -323,14 +436,25 @@ app.post('/login', async (req, res) => {
     );
     
     if (users.length === 0) {
+      recordLoginFailure(clientIp);
       return res.render('user/login', { error: '手机号或密码错误', phone: '' });
     }
     
     const user = users[0];
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      const failureEntry = recordLoginFailure(clientIp);
+      if (failureEntry.lockUntil) {
+        return res.status(429).render('user/login', {
+          error: getLockedUntilMessage(failureEntry.lockUntil),
+          phone: phone || ''
+        });
+      }
       return res.render('user/login', { error: '手机号或密码错误', phone: '' });
     }
+
+    clearLoginRequests(clientIp);
+    clearLoginFailures(clientIp);
     
     req.session.user = {
       id: user.id,
