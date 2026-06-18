@@ -70,6 +70,13 @@
     const pageError = typeof error !== 'undefined' ? error : null;
     const pageSuccess = typeof success !== 'undefined' ? success : null;
     const userList = Array.isArray(users) ? users : [];
+    const dateTimeFormatter = typeof formatDateTime === 'function'
+      ? formatDateTime
+      : function(value) {
+          if (!value) return '-';
+          const date = value instanceof Date ? value : new Date(value);
+          return Number.isNaN(date.getTime()) ? '-' : date.toLocaleString('zh-CN', { hour12: false });
+        };
   %>
   <nav class="navbar">
     <a class="navbar-brand" href="/admin">
@@ -143,7 +150,7 @@
               <td><%= u.id %></td>
               <td class="phone-cell"><%= u.phone %></td>
               <td><%= u.nickname %></td>
-              <td><%= formatDateTime(u.created_at) %></td>
+              <td><%= dateTimeFormatter(u.created_at) %></td>
               <td>
                 <form action="/admin/users/delete/<%= u.id %>" method="POST" style="display: inline;" onsubmit="return confirm('确定要删除该用户吗？');">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">

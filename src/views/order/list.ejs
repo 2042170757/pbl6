@@ -323,6 +323,13 @@
   <%
     const pageSuccess = typeof success !== 'undefined' ? success : null;
     const orderList = Array.isArray(orders) ? orders : [];
+    const dateTimeFormatter = typeof formatDateTime === 'function'
+      ? formatDateTime
+      : function(value) {
+          if (!value) return '-';
+          const date = value instanceof Date ? value : new Date(value);
+          return Number.isNaN(date.getTime()) ? '-' : date.toLocaleString('zh-CN', { hour12: false });
+        };
   %>
   <nav class="navbar">
     <a class="navbar-brand" href="/products">
@@ -379,7 +386,7 @@
                 <span><strong>卖家</strong> <%= o.seller_nickname %></span>
                 <span><strong>收货人</strong> <%= o.receiver_name || '-' %> / <%= o.receiver_phone || '-' %></span>
                 <span><strong>收货地址</strong> <%= o.receiver_address || '-' %></span>
-                <span><strong>下单时间</strong> <%= formatDateTime(o.created_at) %></span>
+                <span><strong>下单时间</strong> <%= dateTimeFormatter(o.created_at) %></span>
               </div>
             </div>
 

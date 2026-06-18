@@ -66,6 +66,13 @@
   <%
     const pageSuccess = typeof success !== 'undefined' ? success : null;
     const productList = Array.isArray(products) ? products : [];
+    const dateTimeFormatter = typeof formatDateTime === 'function'
+      ? formatDateTime
+      : function(value) {
+          if (!value) return '-';
+          const date = value instanceof Date ? value : new Date(value);
+          return Number.isNaN(date.getTime()) ? '-' : date.toLocaleString('zh-CN', { hour12: false });
+        };
   %>
   <nav class="navbar">
     <a class="navbar-brand" href="/">
@@ -146,7 +153,7 @@
                     <span class="status-badge status-deleted">已删除</span>
                   <% } %>
                 </td>
-                <td><%= formatDateTime(p.created_at) %></td>
+                <td><%= dateTimeFormatter(p.created_at) %></td>
                 <td>
                   <% if (p.status !== 'deleted') { %>
                   <form action="/admin/products/delete/<%= p.id %>" method="POST" style="display: inline;" onsubmit="return confirm('确定强制下架该商品？');">

@@ -374,6 +374,13 @@
     const pageError = typeof error !== 'undefined' ? error : null;
     const pageSuccess = typeof success !== 'undefined' ? success : null;
     const productImages = typeof images !== 'undefined' ? images : [];
+    const dateTimeFormatter = typeof formatDateTime === 'function'
+      ? formatDateTime
+      : function(value) {
+          if (!value) return '-';
+          const date = value instanceof Date ? value : new Date(value);
+          return Number.isNaN(date.getTime()) ? '-' : date.toLocaleString('zh-CN', { hour12: false });
+        };
   %>
   <nav class="navbar">
     <a class="navbar-brand" href="/products">
@@ -423,7 +430,7 @@
         <div class="meta">
           <strong>卖家</strong><span><%= product.nickname %></span>
           <strong>联系方式</strong><span><%= product.phone %></span>
-          <strong>发布时间</strong><span><%= formatDateTime(product.created_at) %></span>
+          <strong>发布时间</strong><span><%= dateTimeFormatter(product.created_at) %></span>
         </div>
 
         <div class="description"><%= product.description || '卖家暂未填写详细描述。' %></div>
