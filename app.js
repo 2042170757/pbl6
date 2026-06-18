@@ -29,6 +29,28 @@ app.use(productRoutes);
 app.use(orderRoutes);
 app.use(adminRoutes);
 
+app.use((req, res) => {
+  res.status(404).render('error', {
+    title: '页面未找到',
+    statusCode: 404,
+    message: '你访问的页面不存在，可能已被移动或删除。'
+  });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err);
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  return res.status(500).render('error', {
+    title: '服务器内部错误',
+    statusCode: 500,
+    message: '服务器处理请求时出现异常，请稍后重试。'
+  });
+});
+
 initDatabase()
   .then(() => {
     const port = process.env.PORT || 3000;

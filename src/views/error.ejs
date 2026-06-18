@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || '页面错误' %> - 校园二手交易平台</title>
+  <link rel="stylesheet" href="/css/common.css">
+  <style>
+    .error-page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .error-panel {
+      width: 100%;
+      max-width: 560px;
+      padding: 40px 32px;
+      background: rgba(15, 15, 25, 0.88);
+      border: 1px solid rgba(0, 240, 255, 0.16);
+      border-radius: 18px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      backdrop-filter: blur(20px);
+    }
+
+    .error-code {
+      font-size: 56px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 16px;
+      color: var(--neon-cyan);
+      text-shadow: var(--glow-cyan);
+    }
+
+    .error-title {
+      font-size: 24px;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    .error-message {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+
+    .error-actions {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .error-button,
+    .error-button-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 140px;
+      height: 46px;
+      padding: 0 22px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+
+    .error-button {
+      color: #000;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+    }
+
+    .error-button:hover {
+      box-shadow: var(--glow-cyan);
+      transform: translateY(-2px);
+    }
+
+    .error-button-secondary {
+      color: var(--text-primary);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      background: rgba(0, 240, 255, 0.05);
+    }
+
+    .error-button-secondary:hover {
+      color: var(--neon-cyan);
+      border-color: var(--neon-cyan);
+      box-shadow: var(--glow-cyan);
+    }
+
+    @media (max-width: 520px) {
+      .error-panel {
+        padding: 32px 24px;
+      }
+
+      .error-code {
+        font-size: 44px;
+      }
+    }
+  </style>
+</head>
+<body class="error-page">
+  <div class="error-panel">
+    <div class="error-code"><%= statusCode || 500 %></div>
+    <h1 class="error-title"><%= title || '页面错误' %></h1>
+    <p class="error-message"><%= message || '服务器暂时无法处理当前请求，请稍后重试。' %></p>
+    <div class="error-actions">
+      <a class="error-button" href="/products">返回商品列表</a>
+      <a class="error-button-secondary" href="javascript:history.back()">返回上一页</a>
+    </div>
+  </div>
+</body>
+</html>
