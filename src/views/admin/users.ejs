@@ -66,6 +66,11 @@
   </style>
 </head>
 <body class="admin-page">
+  <%
+    const pageError = typeof error !== 'undefined' ? error : null;
+    const pageSuccess = typeof success !== 'undefined' ? success : null;
+    const userList = Array.isArray(users) ? users : [];
+  %>
   <nav class="navbar">
     <a class="navbar-brand" href="/admin">
       <div class="brand-icon">
@@ -93,25 +98,25 @@
         <a href="/admin" class="btn-back">返回首页</a>
       </div>
 
-      <% if (error) { %>
+      <% if (pageError) { %>
       <div class="alert-error">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
-        <span><%= error %></span>
+        <span><%= pageError %></span>
       </div>
       <% } %>
 
-      <% if (success) { %>
+      <% if (pageSuccess) { %>
       <div class="alert-success">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
         </svg>
-        <span><%= success %></span>
+        <span><%= pageSuccess %></span>
       </div>
       <% } %>
 
-      <% if (users.length === 0) { %>
+      <% if (userList.length === 0) { %>
       <div class="table-card">
         <div class="empty-state">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
@@ -133,12 +138,12 @@
             </tr>
           </thead>
           <tbody>
-            <% users.forEach(function(u) { %>
+            <% userList.forEach(function(u) { %>
             <tr>
               <td><%= u.id %></td>
               <td class="phone-cell"><%= u.phone %></td>
               <td><%= u.nickname %></td>
-              <td><%= new Date(u.created_at).toLocaleString('zh-CN') %></td>
+              <td><%= formatDateTime(u.created_at) %></td>
               <td>
                 <form action="/admin/users/delete/<%= u.id %>" method="POST" style="display: inline;" onsubmit="return confirm('确定要删除该用户吗？');">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">

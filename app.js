@@ -5,6 +5,7 @@ const path = require('path');
 const sessionConfig = require('./src/config/session');
 const { ensureCsrfToken, validateStateChangingRequests } = require('./src/middlewares/csrf');
 const { attachCurrentUser } = require('./src/middlewares/auth');
+const { attachViewHelpers } = require('./src/middlewares/viewHelpers');
 const authRoutes = require('./src/routes/auth');
 const productRoutes = require('./src/routes/product');
 const orderRoutes = require('./src/routes/order');
@@ -23,6 +24,7 @@ app.use(session(sessionConfig));
 app.use(ensureCsrfToken);
 app.use(validateStateChangingRequests);
 app.use(attachCurrentUser);
+app.use(attachViewHelpers);
 
 app.use(authRoutes);
 app.use(productRoutes);

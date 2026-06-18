@@ -320,6 +320,10 @@
   </style>
 </head>
 <body>
+  <%
+    const pageSuccess = typeof success !== 'undefined' ? success : null;
+    const orderList = Array.isArray(orders) ? orders : [];
+  %>
   <nav class="navbar">
     <a class="navbar-brand" href="/products">
       <span class="brand-icon">二</span>
@@ -343,23 +347,23 @@
       <a href="/products" class="btn-back">返回商品列表</a>
     </div>
 
-    <% if (success) { %>
+    <% if (pageSuccess) { %>
       <div class="alert-success">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
         </svg>
-        <span><%= success %></span>
+        <span><%= pageSuccess %></span>
       </div>
     <% } %>
 
-    <% if (orders.length === 0) { %>
+    <% if (orderList.length === 0) { %>
       <div class="empty-state">
         <p>暂无订单记录，去商品列表看看有没有合适的物品。</p>
         <a href="/products">浏览商品</a>
       </div>
     <% } else { %>
       <div class="orders-list">
-        <% orders.forEach(function(o) { %>
+        <% orderList.forEach(function(o) { %>
           <article class="order-card">
             <% if (o.productImages && o.productImages.length > 0) { %>
               <img class="order-image" src="<%= o.productImages[0] %>" alt="<%= o.product_title %>">
@@ -375,7 +379,7 @@
                 <span><strong>卖家</strong> <%= o.seller_nickname %></span>
                 <span><strong>收货人</strong> <%= o.receiver_name || '-' %> / <%= o.receiver_phone || '-' %></span>
                 <span><strong>收货地址</strong> <%= o.receiver_address || '-' %></span>
-                <span><strong>下单时间</strong> <%= o.created_at ? new Date(o.created_at).toLocaleString('zh-CN') : '-' %></span>
+                <span><strong>下单时间</strong> <%= formatDateTime(o.created_at) %></span>
               </div>
             </div>
 

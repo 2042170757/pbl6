@@ -477,8 +477,9 @@
 </head>
 <body>
   <%
-    const currentQuery = query || {};
-    const paginationData = pagination || {};
+    const productList = Array.isArray(products) ? products : [];
+    const currentQuery = typeof query !== 'undefined' && query ? query : {};
+    const paginationData = typeof pagination !== 'undefined' && pagination ? pagination : {};
     const buildPageUrl = (pageNumber) => {
       const params = new URLSearchParams();
       if (currentQuery.q) params.set('q', currentQuery.q);
@@ -518,11 +519,11 @@
 
     <form class="toolbar" method="GET" action="/products">
       <input type="search" name="q" placeholder="搜索商品标题、描述或卖家"
-             value="<%= query && query.q ? query.q : '' %>">
+             value="<%= currentQuery.q ? currentQuery.q : '' %>">
       <select name="sort">
-        <option value="latest" <%= !query || query.sort === 'latest' ? 'selected' : '' %>>最新发布</option>
-        <option value="price_asc" <%= query && query.sort === 'price_asc' ? 'selected' : '' %>>价格升序</option>
-        <option value="price_desc" <%= query && query.sort === 'price_desc' ? 'selected' : '' %>>价格降序</option>
+        <option value="latest" <%= !currentQuery.sort || currentQuery.sort === 'latest' ? 'selected' : '' %>>最新发布</option>
+        <option value="price_asc" <%= currentQuery.sort === 'price_asc' ? 'selected' : '' %>>价格升序</option>
+        <option value="price_desc" <%= currentQuery.sort === 'price_desc' ? 'selected' : '' %>>价格降序</option>
       </select>
       <button type="submit" class="btn-search">搜索</button>
     </form>
@@ -532,16 +533,16 @@
       <span>第 <strong><%= paginationData.currentPage || 1 %></strong> / <strong><%= paginationData.totalPages || 1 %></strong> 页</span>
     </div>
 
-    <% if (query && query.success) { %>
+    <% if (currentQuery.success) { %>
     <div class="alert-success">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
       </svg>
-      <span><%= query.success %></span>
+      <span><%= currentQuery.success %></span>
     </div>
     <% } %>
 
-    <% if (products.length === 0) { %>
+    <% if (productList.length === 0) { %>
     <div class="empty-state">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
@@ -553,7 +554,7 @@
     </div>
     <% } else { %>
     <div class="products-grid">
-      <% products.forEach(function(p) { %>
+      <% productList.forEach(function(p) { %>
       <a class="product-card" href="/products/<%= p.id %>">
         <div class="product-image">
           <% if (p.productImages && p.productImages.length > 0) { %>

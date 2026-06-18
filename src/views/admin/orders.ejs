@@ -34,6 +34,10 @@
   </style>
 </head>
 <body class="admin-page">
+  <%
+    const orderList = Array.isArray(orders) ? orders : [];
+    const orderStats = stats || { totalOrders: 0, totalAmount: 0, pendingOrders: 0 };
+  %>
   <nav class="navbar">
     <a class="navbar-brand" href="/">
       <div class="brand-icon">
@@ -69,21 +73,21 @@
 
         <div class="stats-grid">
           <div class="stat-card">
-            <div class="stat-value"><%= stats.totalOrders %></div>
+            <div class="stat-value"><%= orderStats.totalOrders %></div>
             <div class="stat-label">总订单数</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value yellow">¥<%= parseFloat(stats.totalAmount).toFixed(2) %></div>
+            <div class="stat-value yellow">¥<%= parseFloat(orderStats.totalAmount || 0).toFixed(2) %></div>
             <div class="stat-label">成交总额</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value pink"><%= stats.pendingOrders %></div>
+            <div class="stat-value pink"><%= orderStats.pendingOrders %></div>
             <div class="stat-label">待处理订单</div>
           </div>
         </div>
 
         <div class="data-table-wrap">
-          <% if (orders.length === 0) { %>
+          <% if (orderList.length === 0) { %>
           <div class="empty-state">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
@@ -104,7 +108,7 @@
               </tr>
             </thead>
             <tbody>
-              <% orders.forEach(function(o) { %>
+              <% orderList.forEach(function(o) { %>
               <tr>
                 <td>#<%= String(o.id).padStart(6, '0') %></td>
                 <td><%= o.product_title || '商品#' + o.product_id %></td>
@@ -122,7 +126,7 @@
                     <span class="status-badge status-refunded">已退款</span>
                   <% } %>
                 </td>
-                <td><%= o.created_at ? o.created_at.toISOString().slice(0, 19).replace('T', ' ') : '-' %></td>
+                <td><%= formatDateTime(o.created_at) %></td>
               </tr>
               <% }); %>
             </tbody>

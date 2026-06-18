@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+<%
+  const pageTitle = typeof title !== 'undefined' ? title : '页面错误';
+  const pageStatusCode = typeof statusCode !== 'undefined' ? statusCode : 500;
+  const pageMessage = typeof message !== 'undefined'
+    ? message
+    : '服务器暂时无法处理当前请求，请稍后重试。';
+%>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title || '页面错误' %> - 校园二手交易平台</title>
+  <title><%= pageTitle %> - 校园二手交易平台</title>
   <link rel="stylesheet" href="/css/common.css">
   <style>
     .error-page {
@@ -105,9 +112,9 @@
 </head>
 <body class="error-page">
   <div class="error-panel">
-    <div class="error-code"><%= statusCode || 500 %></div>
-    <h1 class="error-title"><%= title || '页面错误' %></h1>
-    <p class="error-message"><%= message || '服务器暂时无法处理当前请求，请稍后重试。' %></p>
+    <div class="error-code"><%= pageStatusCode %></div>
+    <h1 class="error-title"><%= pageTitle %></h1>
+    <p class="error-message"><%= pageMessage %></p>
     <div class="error-actions">
       <a class="error-button" href="/products">返回商品列表</a>
       <a class="error-button-secondary" href="javascript:history.back()">返回上一页</a>

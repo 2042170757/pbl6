@@ -408,6 +408,9 @@
   </style>
 </head>
 <body>
+  <%
+    const pageError = typeof error !== 'undefined' ? error : null;
+  %>
   <nav class="navbar">
     <a class="navbar-brand" href="/products">
       <span class="brand-icon">二</span>
@@ -431,8 +434,8 @@
     </div>
 
     <div class="form-card">
-      <% if (error) { %>
-      <div class="error-msg"><%= error %></div>
+      <% if (pageError) { %>
+      <div class="error-msg"><%= pageError %></div>
       <% } %>
 
       <form id="edit-form" action="/products/<%= product.id %>/edit" method="POST" enctype="multipart/form-data">
