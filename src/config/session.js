@@ -1,11 +1,20 @@
-const isProduction = process.env.NODE_ENV === 'production';
+const crypto = require('crypto');
 
-if (isProduction && !process.env.SESSION_SECRET) {
+const isProduction = process.env.NODE_ENV === 'production';
+const configuredSecret = (process.env.SESSION_SECRET || '').trim();
+
+if (isProduction && !configuredSecret) {
   throw new Error('SESSION_SECRET is required in production');
 }
 
+const sessionSecret = configuredSecret || crypto.randomBytes(32).toString('hex');
+
+if (!isProduction && !configuredSecret) {
+  console.warn('SESSION_SECRET is not configured. Using an ephemeral development secret.');
+}
+
 module.exports = {
-  secret: process.env.SESSION_SECRET || 'pbl6_dev_session_secret',
+  secret: sessionSecret,
   resave: false,
   saveUninitialized: false,
   name: 'pbl6.sid',
