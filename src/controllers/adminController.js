@@ -30,21 +30,70 @@ async function listUsers(req, res) {
       "SELECT id, phone, nickname, role, created_at FROM users WHERE role = 'user' ORDER BY created_at DESC"
     );
 
-    return res.render('admin/users', { user: req.session.user, users });
+    return res.render('admin/users', {
+      user: req.session.user,
+      users,
+      error: req.query.error || null
+    });
   } catch (err) {
     console.error(err);
-    return res.render('admin/users', { user: req.session.user, users: [] });
+    return res.render('admin/users', {
+      user: req.session.user,
+      users: [],
+      error: '用户列表加载失败'
+    });
   }
 }
 
 async function deleteUser(req, res) {
   try {
     const pool = getPool();
-    await pool.execute('DELETE FROM users WHERE id = ? AND role = \'user\'', [req.params.id]);
+    const userId = Number(req.params.id);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.redirect(`/admin/users?error=${encodeURIComponent('用户ID无效')}`);
+    }
+
+    const [[userRow]] = await pool.execute(
+      "SELECT id FROM users WHERE id = ? AND role = 'user'",
+      [userId]
+    );
+
+    if (!userRow) {
+      return res.redirect(`/admin/users?error=${encodeURIComponent('用户不存在或不可删除')}`);
+    }
+
+    const [[productStats]] = await pool.execute(
+      `SELECT COUNT(*) AS total
+       FROM products
+       WHERE user_id = ? AND status <> 'deleted'`,
+      [userId]
+    );
+
+    if (productStats.total > 0) {
+      return res.redirect(
+        `/admin/users?error=${encodeURIComponent('该用户仍有关联商品，请先处理商品后再删除')}`
+      );
+    }
+
+    const [[orderStats]] = await pool.execute(
+      `SELECT COUNT(*) AS total
+       FROM orders
+       WHERE buyer_id = ? OR seller_id = ?`,
+      [userId, userId]
+    );
+
+    if (orderStats.total > 0) {
+      return res.redirect(
+        `/admin/users?error=${encodeURIComponent('该用户仍有关联订单，请先处理订单后再删除')}`
+      );
+    }
+
+    await pool.execute("DELETE FROM users WHERE id = ? AND role = 'user'", [userId]);
     return res.redirect('/admin/users');
   } catch (err) {
     console.error(err);
-    return res.redirect('/admin/users');
+    return res.redirect(`/admin/users?error=${encodeURIComponent('删除用户失败，请稍后重试')}`);
   }
 }
 
