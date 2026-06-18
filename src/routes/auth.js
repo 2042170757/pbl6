@@ -5,9 +5,12 @@ const {
   register,
   showLogin,
   login,
-  logout
+  logout,
+  showProfile,
+  updateProfile
 } = require('../controllers/authController');
 const { loginRateLimiter } = require('../middlewares/loginRateLimit');
+const { requireUser } = require('../middlewares/auth');
 
 const router = express.Router();
 
@@ -16,6 +19,8 @@ router.get('/register', showRegister);
 router.post('/register', register);
 router.get('/login', showLogin);
 router.post('/login', loginRateLimiter, login);
+router.get('/profile', requireUser, showProfile);
+router.post('/profile', requireUser, updateProfile);
 router.get('/logout', logout);
 
 module.exports = router;

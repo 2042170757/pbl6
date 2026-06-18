@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的资料 - 校园二手交易平台</title>
+  <style>
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-card: rgba(15, 15, 25, 0.9);
+      --neon-cyan: #00f0ff;
+      --neon-pink: #ff00aa;
+      --neon-purple: #8b5cf6;
+      --neon-blue: #3b82f6;
+      --neon-green: #00ff88;
+      --text-primary: #e0e0e0;
+      --text-muted: #8892a0;
+      --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.4);
+      --glow-pink: 0 0 20px rgba(255, 0, 170, 0.4);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+      background: var(--bg-deep);
+      min-height: 100vh;
+      color: var(--text-primary);
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .navbar {
+      height: 64px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8, 8, 15, 0.95);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+      position: relative;
+      z-index: 2;
+    }
+
+    .navbar::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-pink), transparent);
+    }
+
+    .navbar-brand,
+    .nav-link {
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      box-shadow: var(--glow-cyan);
+      color: #000;
+    }
+
+    .navbar-user {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: var(--text-muted);
+      font-size: 14px;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--neon-cyan);
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 18px;
+      margin-bottom: 28px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+    }
+
+    .page-title {
+      font-size: 30px;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, var(--neon-cyan), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 2px;
+    }
+
+    .page-subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .btn-back {
+      padding: 10px 18px;
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 8px;
+      color: var(--neon-cyan);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .btn-back:hover {
+      background: rgba(0, 240, 255, 0.08);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .info-card,
+    .form-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 16px;
+      backdrop-filter: blur(20px);
+      overflow: hidden;
+    }
+
+    .info-card {
+      padding: 28px 24px;
+      position: sticky;
+      top: 24px;
+    }
+
+    .avatar {
+      width: 84px;
+      height: 84px;
+      margin-bottom: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      box-shadow: var(--glow-cyan);
+      color: #000;
+      font-size: 34px;
+      font-weight: 800;
+    }
+
+    .profile-name {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .profile-meta {
+      display: grid;
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .meta-item {
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: rgba(0, 240, 255, 0.05);
+      border: 1px solid rgba(0, 240, 255, 0.12);
+    }
+
+    .meta-label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--neon-cyan);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .meta-value {
+      color: var(--text-primary);
+      font-size: 15px;
+      word-break: break-all;
+    }
+
+    .forms-wrap {
+      display: grid;
+      gap: 20px;
+    }
+
+    .form-card {
+      padding: 28px;
+    }
+
+    .section-title {
+      margin-bottom: 8px;
+      font-size: 20px;
+      color: var(--text-primary);
+    }
+
+    .section-desc {
+      margin-bottom: 22px;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .section-desc.active {
+      color: var(--neon-cyan);
+    }
+
+    .alert-error,
+    .alert-success {
+      padding: 14px 18px;
+      margin-bottom: 22px;
+      border-radius: 10px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .alert-error {
+      color: var(--neon-pink);
+      background: rgba(255, 0, 170, 0.1);
+      border: 1px solid rgba(255, 0, 170, 0.3);
+    }
+
+    .alert-success {
+      color: var(--neon-green);
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+    }
+
+    .alert-error svg,
+    .alert-success svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--neon-cyan);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+      font-size: 15px;
+      color: var(--text-primary);
+      background: rgba(0, 240, 255, 0.04);
+      border: 1px solid rgba(0, 240, 255, 0.18);
+      border-radius: 8px;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .form-input:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .form-input[readonly] {
+      color: var(--text-muted);
+      cursor: not-allowed;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .form-hint {
+      display: block;
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      color: #000;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .btn-submit.password {
+      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+      box-shadow: none;
+    }
+
+    .btn-submit.password:hover {
+      box-shadow: var(--glow-pink);
+    }
+
+    @media (max-width: 860px) {
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .info-card {
+        position: static;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .navbar {
+        height: auto;
+        padding: 16px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .container {
+        padding: 28px 16px 48px;
+      }
+
+      .form-card {
+        padding: 22px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a class="navbar-brand" href="/products">
+      <span class="brand-icon">二</span>
+      <span>校园二手交易</span>
+    </a>
+    <div class="navbar-user">
+      <span><%= user.nickname %></span>
+      <a href="/products" class="nav-link">商品列表</a>
+      <a href="/orders" class="nav-link">我的订单</a>
+      <a href="/profile" class="nav-link active">我的资料</a>
+      <a href="/logout" class="nav-link">退出</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">我的资料</h1>
+        <p class="page-subtitle">维护昵称和登录密码，修改后会立即同步到当前账号会话。</p>
+      </div>
+      <a href="/products" class="btn-back">返回商品列表</a>
+    </div>
+
+    <div class="profile-grid">
+      <aside class="info-card">
+        <div class="avatar"><%= (profile.nickname || 'U').charAt(0).toUpperCase() %></div>
+        <h2 class="profile-name"><%= profile.nickname || '未设置昵称' %></h2>
+        <p class="page-subtitle">账号资料概览</p>
+
+        <div class="profile-meta">
+          <div class="meta-item">
+            <span class="meta-label">手机号</span>
+            <span class="meta-value"><%= profile.phone %></span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">昵称</span>
+            <span class="meta-value"><%= profile.nickname %></span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">账号类型</span>
+            <span class="meta-value">普通用户</span>
+          </div>
+        </div>
+      </aside>
+
+      <section class="forms-wrap">
+        <% if (error) { %>
+          <div class="alert-error">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span><%= error %></span>
+          </div>
+        <% } %>
+
+        <% if (success) { %>
+          <div class="alert-success">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span><%= success %></span>
+          </div>
+        <% } %>
+
+        <article class="form-card">
+          <h2 class="section-title">修改昵称</h2>
+          <p class="section-desc <%= activeForm === 'nickname' ? 'active' : '' %>">更新后，商品列表和订单中的欢迎信息会同步显示新的昵称。</p>
+          <form method="POST" action="/profile">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="formType" value="nickname">
+
+            <div class="form-group">
+              <label class="form-label" for="phone">手机号</label>
+              <input id="phone" class="form-input" type="text" value="<%= profile.phone %>" readonly>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="nickname">昵称</label>
+              <input id="nickname" name="nickname" class="form-input" type="text" maxlength="50" required value="<%= profile.nickname %>">
+              <span class="form-hint">昵称长度不超过50个字符。</span>
+            </div>
+
+            <button class="btn-submit" type="submit">保存昵称</button>
+          </form>
+        </article>
+
+        <article class="form-card">
+          <h2 class="section-title">修改密码</h2>
+          <p class="section-desc <%= activeForm === 'password' ? 'active' : '' %>">修改密码前需要先验证当前旧密码，新密码长度需在6-18位之间。</p>
+          <form method="POST" action="/profile">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="formType" value="password">
+
+            <div class="form-group">
+              <label class="form-label" for="oldPassword">旧密码</label>
+              <input id="oldPassword" name="oldPassword" class="form-input" type="password" minlength="6" maxlength="18" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="newPassword">新密码</label>
+              <input id="newPassword" name="newPassword" class="form-input" type="password" minlength="6" maxlength="18" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="confirmPassword">确认新密码</label>
+              <input id="confirmPassword" name="confirmPassword" class="form-input" type="password" minlength="6" maxlength="18" required>
+              <span class="form-hint">建议使用与旧密码不同的新密码。</span>
+            </div>
+
+            <button class="btn-submit password" type="submit">更新密码</button>
+          </form>
+        </article>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

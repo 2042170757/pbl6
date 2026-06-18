@@ -9,6 +9,42 @@ const {
   getLockedUntilMessage
 } = require('../middlewares/loginRateLimit');
 
+async function findUserById(userId) {
+  const pool = getPool();
+  const [users] = await pool.execute(
+    'SELECT id, phone, password, nickname, role FROM users WHERE id = ? LIMIT 1',
+    [userId]
+  );
+
+  return users[0] || null;
+}
+
+function syncSessionUser(req, user) {
+  if (!req.session.user || !user) {
+    return;
+  }
+
+  req.session.user.id = user.id;
+  req.session.user.phone = user.phone;
+  req.session.user.nickname = user.nickname;
+  req.session.user.role = user.role;
+}
+
+function buildProfileViewModel(req, profile, overrides = {}) {
+  return {
+    user: req.session.user,
+    profile: {
+      phone: profile?.phone || '',
+      nickname: Object.prototype.hasOwnProperty.call(overrides, 'nickname')
+        ? overrides.nickname
+        : (profile?.nickname || '')
+    },
+    error: overrides.error || null,
+    success: overrides.success || null,
+    activeForm: overrides.activeForm || 'nickname'
+  };
+}
+
 function redirectHome(req, res) {
   if (req.session.user) {
     return req.session.user.role === 'admin'
@@ -141,11 +177,172 @@ function logout(req, res) {
   res.redirect('/login');
 }
 
+async function showProfile(req, res) {
+  try {
+    const currentUser = await findUserById(req.session.user.id);
+
+    if (!currentUser) {
+      return res.redirect('/logout');
+    }
+
+    syncSessionUser(req, currentUser);
+
+    return res.render(
+      'user/profile',
+      buildProfileViewModel(req, currentUser, {
+        success: req.query.success || null,
+        activeForm: req.query.form === 'password' ? 'password' : 'nickname'
+      })
+    );
+  } catch (err) {
+    console.error(err);
+    return res.render(
+      'user/profile',
+      buildProfileViewModel(req, req.session.user, {
+        error: '资料加载失败，请稍后重试'
+      })
+    );
+  }
+}
+
+async function updateProfile(req, res) {
+  const formType = req.body.formType;
+
+  try {
+    const currentUser = await findUserById(req.session.user.id);
+
+    if (!currentUser) {
+      return res.redirect('/logout');
+    }
+
+    syncSessionUser(req, currentUser);
+
+    if (formType === 'nickname') {
+      const nickname = (req.body.nickname || '').trim();
+
+      if (!nickname) {
+        return res.render(
+          'user/profile',
+          buildProfileViewModel(req, currentUser, {
+            nickname,
+            error: '请输入昵称',
+            activeForm: 'nickname'
+          })
+        );
+      }
+
+      if (nickname.length > 50) {
+        return res.render(
+          'user/profile',
+          buildProfileViewModel(req, currentUser, {
+            nickname,
+            error: '昵称最多50个字符',
+            activeForm: 'nickname'
+          })
+        );
+      }
+
+      await getPool().execute(
+        'UPDATE users SET nickname = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        [nickname, currentUser.id]
+      );
+
+      req.session.user.nickname = nickname;
+      return res.redirect(`/profile?success=${encodeURIComponent('昵称更新成功')}`);
+    }
+
+    if (formType === 'password') {
+      const oldPassword = req.body.oldPassword || '';
+      const newPassword = req.body.newPassword || '';
+      const confirmPassword = req.body.confirmPassword || '';
+
+      if (!oldPassword || !newPassword || !confirmPassword) {
+        return res.render(
+          'user/profile',
+          buildProfileViewModel(req, currentUser, {
+            error: '请填写完整的密码信息',
+            activeForm: 'password'
+          })
+        );
+      }
+
+      if (newPassword.length < 6 || newPassword.length > 18) {
+        return res.render(
+          'user/profile',
+          buildProfileViewModel(req, currentUser, {
+            error: '新密码长度需在6-18位之间',
+            activeForm: 'password'
+          })
+        );
+      }
+
+      if (newPassword !== confirmPassword) {
+        return res.render(
+          'user/profile',
+          buildProfileViewModel(req, currentUser, {
+            error: '两次输入的新密码不一致',
+            activeForm: 'password'
+          })
+        );
+      }
+
+      const isOldPasswordValid = await bcrypt.compare(oldPassword, currentUser.password);
+      if (!isOldPasswordValid) {
+        return res.render(
+          'user/profile',
+          buildProfileViewModel(req, currentUser, {
+            error: '旧密码验证失败',
+            activeForm: 'password'
+          })
+        );
+      }
+
+      const isSamePassword = await bcrypt.compare(newPassword, currentUser.password);
+      if (isSamePassword) {
+        return res.render(
+          'user/profile',
+          buildProfileViewModel(req, currentUser, {
+            error: '新密码不能与旧密码相同',
+            activeForm: 'password'
+          })
+        );
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await getPool().execute(
+        'UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        [hashedPassword, currentUser.id]
+      );
+
+      return res.redirect(`/profile?success=${encodeURIComponent('密码修改成功')}&form=password`);
+    }
+
+    return res.status(400).render(
+      'user/profile',
+      buildProfileViewModel(req, currentUser, {
+        error: '无效的资料更新请求'
+      })
+    );
+  } catch (err) {
+    console.error(err);
+    return res.render(
+      'user/profile',
+      buildProfileViewModel(req, req.session.user, {
+        error: '资料更新失败，请稍后重试',
+        activeForm: formType === 'password' ? 'password' : 'nickname',
+        nickname: (req.body.nickname || '').trim()
+      })
+    );
+  }
+}
+
 module.exports = {
   redirectHome,
   showRegister,
   register,
   showLogin,
   login,
-  logout
+  logout,
+  showProfile,
+  updateProfile
 };
