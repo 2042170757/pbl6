@@ -56,7 +56,7 @@ async function register(req, res) {
       [phone, hashedPassword, '新用户', 'user']
     );
 
-    return res.redirect('/login');
+    return res.redirect(`/login?success=${encodeURIComponent('注册成功，请登录')}`);
   } catch (err) {
     console.error(err);
     return res.render('user/register', { error: '注册失败，请稍后重试' });
@@ -64,7 +64,11 @@ async function register(req, res) {
 }
 
 function showLogin(req, res) {
-  res.render('user/login', { error: null, phone: '' });
+  res.render('user/login', {
+    error: null,
+    phone: '',
+    success: req.query.success || null
+  });
 }
 
 async function login(req, res) {
@@ -77,12 +81,13 @@ async function login(req, res) {
     if (lockedEntry?.lockUntil) {
       return res.status(429).render('user/login', {
         error: getLockedUntilMessage(lockedEntry.lockUntil),
-        phone: phone || ''
+        phone: phone || '',
+        success: null
       });
     }
 
     if (!phone || !password) {
-      return res.render('user/login', { error: '请填写手机号和密码', phone: '' });
+      return res.render('user/login', { error: '请填写手机号和密码', phone: '', success: null });
     }
 
     const [users] = await pool.execute(
@@ -92,7 +97,7 @@ async function login(req, res) {
 
     if (users.length === 0) {
       recordLoginFailure(clientIp);
-      return res.render('user/login', { error: '手机号或密码错误', phone: '' });
+      return res.render('user/login', { error: '手机号或密码错误', phone: '', success: null });
     }
 
     const user = users[0];
@@ -102,11 +107,12 @@ async function login(req, res) {
       if (failureEntry.lockUntil) {
         return res.status(429).render('user/login', {
           error: getLockedUntilMessage(failureEntry.lockUntil),
-          phone: phone || ''
+          phone: phone || '',
+          success: null
         });
       }
 
-      return res.render('user/login', { error: '手机号或密码错误', phone: '' });
+      return res.render('user/login', { error: '手机号或密码错误', phone: '', success: null });
     }
 
     clearLoginRequests(clientIp);
@@ -126,7 +132,7 @@ async function login(req, res) {
     return res.redirect('/products');
   } catch (err) {
     console.error(err);
-    return res.render('user/login', { error: '登录失败，请稍后重试', phone: '' });
+    return res.render('user/login', { error: '登录失败，请稍后重试', phone: '', success: null });
   }
 }
 

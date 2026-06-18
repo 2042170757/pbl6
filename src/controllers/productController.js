@@ -56,7 +56,7 @@ async function listProducts(req, res) {
     return res.render('product/list', {
       user: req.session.user,
       products: normalizedProducts,
-      query: { q: keyword, sort, page: currentPage },
+      query: { q: keyword, sort, page: currentPage, success: req.query.success || null },
       pagination: {
         currentPage,
         pageSize,
@@ -71,7 +71,7 @@ async function listProducts(req, res) {
     return res.render('product/list', {
       user: req.session.user,
       products: [],
-      query: { q: '', sort: 'latest', page: 1 },
+      query: { q: '', sort: 'latest', page: 1, success: null },
       pagination: {
         currentPage: 1,
         pageSize: 12,
@@ -122,7 +122,7 @@ async function publishProduct(req, res) {
       [req.session.user.id, title.trim(), description ? description.trim() : '', priceValue, JSON.stringify(imagePaths)]
     );
 
-    return res.redirect('/products');
+    return res.redirect(`/products?success=${encodeURIComponent('商品发布成功')}`);
   } catch (err) {
     console.error(err);
     return res.render('product/publish', { user: req.session.user, error: '发布失败，请稍后重试' });
@@ -206,7 +206,7 @@ async function buyProduct(req, res) {
     );
 
     await connection.commit();
-    return res.redirect('/orders');
+    return res.redirect(`/orders?success=${encodeURIComponent('下单成功')}`);
   } catch (err) {
     await connection.rollback();
     console.error(err);

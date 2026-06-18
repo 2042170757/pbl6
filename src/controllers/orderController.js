@@ -24,10 +24,18 @@ async function listOrders(req, res) {
       isBuyer: order.buyer_id === req.session.user.id
     }));
 
-    return res.render('order/list', { user: req.session.user, orders: normalizedOrders });
+    return res.render('order/list', {
+      user: req.session.user,
+      orders: normalizedOrders,
+      success: req.query.success || null
+    });
   } catch (err) {
     console.error(err);
-    return res.render('order/list', { user: req.session.user, orders: [] });
+    return res.render('order/list', {
+      user: req.session.user,
+      orders: [],
+      success: null
+    });
   }
 }
 

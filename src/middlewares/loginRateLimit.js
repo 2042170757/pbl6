@@ -88,7 +88,8 @@ function loginRateLimiter(req, res, next) {
   if (lockedEntry?.lockUntil) {
     return res.status(429).render('user/login', {
       error: getLockedUntilMessage(lockedEntry.lockUntil),
-      phone: req.body?.phone || ''
+      phone: req.body?.phone || '',
+      success: null
     });
   }
 
@@ -96,7 +97,8 @@ function loginRateLimiter(req, res, next) {
   if (entry.timestamps.length > LOGIN_RATE_LIMIT_MAX_ATTEMPTS) {
     return res.status(429).render('user/login', {
       error: getRateLimitMessage(),
-      phone: req.body?.phone || ''
+      phone: req.body?.phone || '',
+      success: null
     });
   }
 

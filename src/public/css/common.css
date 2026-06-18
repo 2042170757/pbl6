@@ -482,6 +482,25 @@ body::before {
   flex-shrink: 0;
 }
 
+.alert-success {
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  border-radius: 8px;
+  color: var(--neon-green);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.alert-success svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
 .admin-page .navbar {
   background: var(--bg-sidebar);
 }

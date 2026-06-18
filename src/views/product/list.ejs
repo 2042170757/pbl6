@@ -293,6 +293,25 @@
       font-weight: 600;
     }
 
+    .alert-success {
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 8px;
+      color: #00ff88;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .alert-success svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
     .product-card {
       display: block;
       background: var(--bg-card);
@@ -511,6 +530,15 @@
       <span>共找到 <strong><%= paginationData.totalItems || 0 %></strong> 件商品</span>
       <span>第 <strong><%= paginationData.currentPage || 1 %></strong> / <strong><%= paginationData.totalPages || 1 %></strong> 页</span>
     </div>
+
+    <% if (query && query.success) { %>
+    <div class="alert-success">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+      <span><%= query.success %></span>
+    </div>
+    <% } %>
 
     <% if (products.length === 0) { %>
     <div class="empty-state">

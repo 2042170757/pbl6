@@ -53,6 +53,10 @@
       box-shadow: var(--glow-pink);
     }
 
+    .alert-success {
+      margin-bottom: 24px;
+    }
+
     @media (max-width: 768px) {
       .page-title { font-size: 22px; }
     }
@@ -91,6 +95,15 @@
             返回首页
           </a>
         </div>
+
+        <% if (success) { %>
+        <div class="alert-success">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span><%= success %></span>
+        </div>
+        <% } %>
 
         <div class="data-table-wrap">
           <% if (products.length === 0) { %>
@@ -132,8 +145,10 @@
                 <td><%= p.created_at ? p.created_at.toISOString().slice(0, 19).replace('T', ' ') : '-' %></td>
                 <td>
                   <% if (p.status !== 'deleted') { %>
-                  <a href="javascript:void(0)" class="btn-delete"
-                     onclick="if(confirm('确定强制下架该商品？')) { fetch('/admin/products/delete/<%= p.id %>', {method:'POST', headers:{'x-csrf-token':'<%= csrfToken %>'}}).then(()=>location.reload()); }">强制下架</a>
+                  <form action="/admin/products/delete/<%= p.id %>" method="POST" style="display: inline;" onsubmit="return confirm('确定强制下架该商品？');">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="btn-delete">强制下架</button>
+                  </form>
                   <% } else { %>
                   <span style="color:var(--text-muted);font-size:12px;">—</span>
                   <% } %>

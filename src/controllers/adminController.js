@@ -33,14 +33,16 @@ async function listUsers(req, res) {
     return res.render('admin/users', {
       user: req.session.user,
       users,
-      error: req.query.error || null
+      error: req.query.error || null,
+      success: req.query.success || null
     });
   } catch (err) {
     console.error(err);
     return res.render('admin/users', {
       user: req.session.user,
       users: [],
-      error: '用户列表加载失败'
+      error: '用户列表加载失败',
+      success: null
     });
   }
 }
@@ -90,7 +92,7 @@ async function deleteUser(req, res) {
     }
 
     await pool.execute("DELETE FROM users WHERE id = ? AND role = 'user'", [userId]);
-    return res.redirect('/admin/users');
+    return res.redirect(`/admin/users?success=${encodeURIComponent('用户删除成功')}`);
   } catch (err) {
     console.error(err);
     return res.redirect(`/admin/users?error=${encodeURIComponent('删除用户失败，请稍后重试')}`);
@@ -104,10 +106,18 @@ async function listProducts(req, res) {
       'SELECT products.*, users.nickname FROM products JOIN users ON products.user_id = users.id ORDER BY products.created_at DESC'
     );
 
-    return res.render('admin/products', { user: req.session.user, products });
+    return res.render('admin/products', {
+      user: req.session.user,
+      products,
+      success: req.query.success || null
+    });
   } catch (err) {
     console.error(err);
-    return res.render('admin/products', { user: req.session.user, products: [] });
+    return res.render('admin/products', {
+      user: req.session.user,
+      products: [],
+      success: null
+    });
   }
 }
 
@@ -115,7 +125,7 @@ async function deleteProduct(req, res) {
   try {
     const pool = getPool();
     await pool.execute("UPDATE products SET status = 'deleted' WHERE id = ?", [req.params.id]);
-    return res.redirect('/admin/products');
+    return res.redirect(`/admin/products?success=${encodeURIComponent('商品下架成功')}`);
   } catch (err) {
     console.error(err);
     return res.redirect('/admin/products');

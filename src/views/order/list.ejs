@@ -154,6 +154,25 @@
       gap: 18px;
     }
 
+    .alert-success {
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 8px;
+      color: var(--neon-green);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .alert-success svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
     .order-card {
       display: grid;
       grid-template-columns: 116px 1fr auto;
@@ -322,6 +341,15 @@
       </div>
       <a href="/products" class="btn-back">返回商品列表</a>
     </div>
+
+    <% if (success) { %>
+      <div class="alert-success">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span><%= success %></span>
+      </div>
+    <% } %>
 
     <% if (orders.length === 0) { %>
       <div class="empty-state">
