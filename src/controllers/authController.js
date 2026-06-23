@@ -12,7 +12,7 @@ const {
 async function findUserById(userId) {
   const pool = getPool();
   const [users] = await pool.execute(
-    'SELECT id, phone, password, nickname, role FROM users WHERE id = ? LIMIT 1',
+    'SELECT id, phone, password, nickname, campus, bio, profile_completed, role FROM users WHERE id = ? LIMIT 1',
     [userId]
   );
 
@@ -27,6 +27,9 @@ function syncSessionUser(req, user) {
   req.session.user.id = user.id;
   req.session.user.phone = user.phone;
   req.session.user.nickname = user.nickname;
+  req.session.user.campus = user.campus || '';
+  req.session.user.bio = user.bio || '';
+  req.session.user.profileCompleted = Boolean(user.profile_completed);
   req.session.user.role = user.role;
 }
 
@@ -37,16 +40,28 @@ function buildProfileViewModel(req, profile, overrides = {}) {
       phone: profile?.phone || '',
       nickname: Object.prototype.hasOwnProperty.call(overrides, 'nickname')
         ? overrides.nickname
-        : (profile?.nickname || '')
+        : (profile?.nickname || ''),
+      campus: Object.prototype.hasOwnProperty.call(overrides, 'campus')
+        ? overrides.campus
+        : (profile?.campus || ''),
+      bio: Object.prototype.hasOwnProperty.call(overrides, 'bio')
+        ? overrides.bio
+        : (profile?.bio || ''),
+      profileCompleted: Boolean(profile?.profile_completed)
     },
     error: overrides.error || null,
     success: overrides.success || null,
-    activeForm: overrides.activeForm || 'nickname'
+    activeForm: overrides.activeForm || 'profile',
+    isSetupMode: Boolean(overrides.isSetupMode)
   };
 }
 
 function redirectHome(req, res) {
   if (req.session.user) {
+    if (req.session.user.role === 'user' && req.session.user.profileCompleted === false) {
+      return res.redirect('/profile?setup=1');
+    }
+
     return req.session.user.role === 'admin'
       ? res.redirect('/admin')
       : res.redirect('/products');
@@ -88,8 +103,8 @@ async function register(req, res) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     await pool.execute(
-      'INSERT INTO users (phone, password, nickname, role) VALUES (?, ?, ?, ?)',
-      [phone, hashedPassword, '新用户', 'user']
+      'INSERT INTO users (phone, password, nickname, campus, bio, profile_completed, role) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [phone, hashedPassword, '新用户', '', '', 0, 'user']
     );
 
     return res.redirect(`/login?success=${encodeURIComponent('注册成功，请登录')}`);
@@ -158,11 +173,18 @@ async function login(req, res) {
       id: user.id,
       phone: user.phone,
       nickname: user.nickname,
+      campus: user.campus || '',
+      bio: user.bio || '',
+      profileCompleted: Boolean(user.profile_completed),
       role: user.role
     };
 
     if (user.role === 'admin') {
       return res.redirect('/admin');
+    }
+
+    if (!user.profile_completed) {
+      return res.redirect('/profile?setup=1');
     }
 
     return res.redirect('/products');
@@ -191,7 +213,8 @@ async function showProfile(req, res) {
       'user/profile',
       buildProfileViewModel(req, currentUser, {
         success: req.query.success || null,
-        activeForm: req.query.form === 'password' ? 'password' : 'nickname'
+        activeForm: req.query.form === 'password' ? 'password' : 'profile',
+        isSetupMode: req.query.setup === '1' || !currentUser.profile_completed
       })
     );
   } catch (err) {
@@ -217,16 +240,21 @@ async function updateProfile(req, res) {
 
     syncSessionUser(req, currentUser);
 
-    if (formType === 'nickname') {
+    if (formType === 'profile') {
       const nickname = (req.body.nickname || '').trim();
+      const campus = (req.body.campus || '').trim();
+      const bio = (req.body.bio || '').trim();
 
       if (!nickname) {
         return res.render(
           'user/profile',
           buildProfileViewModel(req, currentUser, {
             nickname,
+            campus,
+            bio,
             error: '请输入昵称',
-            activeForm: 'nickname'
+            activeForm: 'profile',
+            isSetupMode: !currentUser.profile_completed
           })
         );
       }
@@ -236,19 +264,74 @@ async function updateProfile(req, res) {
           'user/profile',
           buildProfileViewModel(req, currentUser, {
             nickname,
+            campus,
+            bio,
             error: '昵称最多50个字符',
-            activeForm: 'nickname'
+            activeForm: 'profile',
+            isSetupMode: !currentUser.profile_completed
+          })
+        );
+      }
+
+      if (!campus) {
+        return res.render(
+          'user/profile',
+          buildProfileViewModel(req, currentUser, {
+            nickname,
+            campus,
+            bio,
+            error: '请输入校区、学院或常用交易地点',
+            activeForm: 'profile',
+            isSetupMode: !currentUser.profile_completed
+          })
+        );
+      }
+
+      if (campus.length > 100) {
+        return res.render(
+          'user/profile',
+          buildProfileViewModel(req, currentUser, {
+            nickname,
+            campus,
+            bio,
+            error: '校区或常用交易地点最多100个字符',
+            activeForm: 'profile',
+            isSetupMode: !currentUser.profile_completed
+          })
+        );
+      }
+
+      if (bio.length > 255) {
+        return res.render(
+          'user/profile',
+          buildProfileViewModel(req, currentUser, {
+            nickname,
+            campus,
+            bio,
+            error: '个人简介最多255个字符',
+            activeForm: 'profile',
+            isSetupMode: !currentUser.profile_completed
           })
         );
       }
 
       await getPool().execute(
-        'UPDATE users SET nickname = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-        [nickname, currentUser.id]
+        `UPDATE users
+         SET nickname = ?, campus = ?, bio = ?, profile_completed = 1, updated_at = CURRENT_TIMESTAMP
+         WHERE id = ?`,
+        [nickname, campus, bio, currentUser.id]
       );
 
       req.session.user.nickname = nickname;
-      return res.redirect(`/profile?success=${encodeURIComponent('昵称更新成功')}`);
+      req.session.user.campus = campus;
+      req.session.user.bio = bio;
+      req.session.user.profileCompleted = true;
+
+      if (!currentUser.profile_completed) {
+        return res.redirect(`/products?success=${encodeURIComponent('资料已完善，开始浏览商品吧')}`);
+      }
+
+      return res.redirect(`/profile?success=${encodeURIComponent('资料更新成功')}`);
     }
 
     if (formType === 'password') {
@@ -261,7 +344,8 @@ async function updateProfile(req, res) {
           'user/profile',
           buildProfileViewModel(req, currentUser, {
             error: '请填写完整的密码信息',
-            activeForm: 'password'
+            activeForm: 'password',
+            isSetupMode: !currentUser.profile_completed
           })
         );
       }
@@ -271,7 +355,8 @@ async function updateProfile(req, res) {
           'user/profile',
           buildProfileViewModel(req, currentUser, {
             error: '新密码长度需在6-18位之间',
-            activeForm: 'password'
+            activeForm: 'password',
+            isSetupMode: !currentUser.profile_completed
           })
         );
       }
@@ -281,7 +366,8 @@ async function updateProfile(req, res) {
           'user/profile',
           buildProfileViewModel(req, currentUser, {
             error: '两次输入的新密码不一致',
-            activeForm: 'password'
+            activeForm: 'password',
+            isSetupMode: !currentUser.profile_completed
           })
         );
       }
@@ -292,7 +378,8 @@ async function updateProfile(req, res) {
           'user/profile',
           buildProfileViewModel(req, currentUser, {
             error: '旧密码验证失败',
-            activeForm: 'password'
+            activeForm: 'password',
+            isSetupMode: !currentUser.profile_completed
           })
         );
       }
@@ -303,7 +390,8 @@ async function updateProfile(req, res) {
           'user/profile',
           buildProfileViewModel(req, currentUser, {
             error: '新密码不能与旧密码相同',
-            activeForm: 'password'
+            activeForm: 'password',
+            isSetupMode: !currentUser.profile_completed
           })
         );
       }
@@ -329,8 +417,10 @@ async function updateProfile(req, res) {
       'user/profile',
       buildProfileViewModel(req, req.session.user, {
         error: '资料更新失败，请稍后重试',
-        activeForm: formType === 'password' ? 'password' : 'nickname',
-        nickname: (req.body.nickname || '').trim()
+        activeForm: formType === 'password' ? 'password' : 'profile',
+        nickname: (req.body.nickname || '').trim(),
+        campus: (req.body.campus || '').trim(),
+        bio: (req.body.bio || '').trim()
       })
     );
   }

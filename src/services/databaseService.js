@@ -93,6 +93,9 @@ async function initDatabase() {
       phone VARCHAR(11) UNIQUE NOT NULL,
       password VARCHAR(255) NOT NULL,
       nickname VARCHAR(50) DEFAULT '新用户',
+      campus VARCHAR(100) DEFAULT '',
+      bio VARCHAR(255) DEFAULT '',
+      profile_completed TINYINT(1) NOT NULL DEFAULT 1,
       role ENUM('user', 'admin') DEFAULT 'user',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -151,6 +154,9 @@ async function initDatabase() {
   await ensureColumn('orders', 'receiver_phone', 'VARCHAR(20)');
   await ensureColumn('orders', 'receiver_address', 'VARCHAR(255)');
   await ensureColumn('orders', 'updated_at', 'DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
+  await ensureColumn('users', 'campus', "VARCHAR(100) DEFAULT ''");
+  await ensureColumn('users', 'bio', "VARCHAR(255) DEFAULT ''");
+  await ensureColumn('users', 'profile_completed', 'TINYINT(1) NOT NULL DEFAULT 1');
   await ensureIndex('products', 'idx_products_status_created', ['status', 'created_at'], '(status, created_at)');
   await ensureIndex('products', 'idx_products_user_id', ['user_id'], '(user_id)');
   await ensureIndex('products', 'idx_products_created_at', ['created_at'], '(created_at)');

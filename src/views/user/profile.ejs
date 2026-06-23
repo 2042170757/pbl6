@@ -19,9 +19,7 @@
       --glow-pink: 0 0 20px rgba(255, 0, 170, 0.4);
     }
 
-    *,
-    *::before,
-    *::after {
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -29,9 +27,9 @@
 
     body {
       font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
-      background: var(--bg-deep);
       min-height: 100vh;
       color: var(--text-primary);
+      background: var(--bg-deep);
       position: relative;
     }
 
@@ -48,11 +46,12 @@
     }
 
     .navbar {
-      height: 64px;
+      min-height: 64px;
       padding: 0 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 18px;
       background: rgba(8, 8, 15, 0.95);
       border-bottom: 1px solid rgba(0, 240, 255, 0.15);
       position: relative;
@@ -69,16 +68,12 @@
       background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-pink), transparent);
     }
 
-    .navbar-brand,
-    .nav-link {
-      color: var(--text-primary);
-      text-decoration: none;
-    }
-
     .navbar-brand {
       display: flex;
       align-items: center;
       gap: 14px;
+      color: var(--text-primary);
+      text-decoration: none;
       font-size: 18px;
       font-weight: 700;
       letter-spacing: 2px;
@@ -94,21 +89,23 @@
       background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
       box-shadow: var(--glow-cyan);
       color: #000;
+      font-weight: 800;
     }
 
     .navbar-user {
       display: flex;
       align-items: center;
       gap: 18px;
+      flex-wrap: wrap;
       color: var(--text-muted);
       font-size: 14px;
-      flex-wrap: wrap;
     }
 
     .nav-link {
       color: var(--text-muted);
+      text-decoration: none;
       font-weight: 600;
-      transition: color 0.3s;
+      transition: color 0.2s;
     }
 
     .nav-link:hover,
@@ -117,11 +114,49 @@
     }
 
     .container {
-      max-width: 1040px;
+      width: min(1120px, calc(100% - 48px));
       margin: 0 auto;
-      padding: 40px 24px 64px;
+      padding: 40px 0 64px;
       position: relative;
       z-index: 1;
+    }
+
+    .setup-banner {
+      margin-bottom: 26px;
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      border: 1px solid rgba(0, 255, 136, 0.28);
+      border-radius: 8px;
+      background: rgba(0, 255, 136, 0.08);
+    }
+
+    .setup-banner strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--neon-green);
+      font-size: 15px;
+      letter-spacing: 1px;
+    }
+
+    .setup-banner span {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .progress-pill {
+      min-width: 104px;
+      padding: 8px 14px;
+      text-align: center;
+      border-radius: 999px;
+      color: #000;
+      background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
+      font-weight: 800;
+      font-size: 13px;
+      white-space: nowrap;
     }
 
     .page-header {
@@ -129,14 +164,15 @@
       justify-content: space-between;
       align-items: flex-end;
       gap: 18px;
-      margin-bottom: 28px;
-      padding-bottom: 22px;
+      margin-bottom: 30px;
+      padding-bottom: 24px;
       border-bottom: 1px solid rgba(0, 240, 255, 0.1);
     }
 
     .page-title {
-      font-size: 30px;
       margin-bottom: 8px;
+      font-size: 32px;
+      font-weight: 800;
       background: linear-gradient(90deg, var(--neon-cyan), #fff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -145,8 +181,10 @@
     }
 
     .page-subtitle {
+      max-width: 620px;
       color: var(--text-muted);
       font-size: 14px;
+      line-height: 1.7;
     }
 
     .btn-back {
@@ -155,8 +193,8 @@
       border-radius: 8px;
       color: var(--neon-cyan);
       text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s;
+      font-weight: 700;
+      transition: all 0.2s;
       white-space: nowrap;
     }
 
@@ -167,58 +205,75 @@
 
     .profile-grid {
       display: grid;
-      grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+      grid-template-columns: 320px minmax(0, 1fr);
       gap: 24px;
       align-items: start;
     }
 
-    .info-card,
-    .form-card {
+    .panel {
       background: var(--bg-card);
       border: 1px solid rgba(0, 240, 255, 0.15);
-      border-radius: 16px;
+      border-radius: 8px;
       backdrop-filter: blur(20px);
       overflow: hidden;
     }
 
-    .info-card {
-      padding: 28px 24px;
+    .summary-panel {
+      padding: 24px;
       position: sticky;
       top: 24px;
     }
 
     .avatar {
-      width: 84px;
-      height: 84px;
+      width: 82px;
+      height: 82px;
       margin-bottom: 18px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border-radius: 20px;
+      border-radius: 18px;
+      color: #000;
       background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
       box-shadow: var(--glow-cyan);
-      color: #000;
       font-size: 34px;
-      font-weight: 800;
+      font-weight: 900;
     }
 
     .profile-name {
-      font-size: 24px;
       margin-bottom: 8px;
       color: var(--text-primary);
+      font-size: 24px;
+      line-height: 1.25;
     }
 
-    .profile-meta {
+    .profile-status {
+      display: inline-flex;
+      margin-bottom: 22px;
+      padding: 5px 11px;
+      border-radius: 999px;
+      color: var(--neon-green);
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.28);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .profile-status.pending {
+      color: var(--neon-pink);
+      background: rgba(255, 0, 170, 0.1);
+      border-color: rgba(255, 0, 170, 0.28);
+    }
+
+    .meta-list {
       display: grid;
-      gap: 14px;
-      margin-top: 24px;
+      gap: 12px;
     }
 
     .meta-item {
-      padding: 14px 16px;
-      border-radius: 12px;
-      background: rgba(0, 240, 255, 0.05);
+      padding: 13px 14px;
       border: 1px solid rgba(0, 240, 255, 0.12);
+      border-radius: 8px;
+      background: rgba(0, 240, 255, 0.04);
     }
 
     .meta-label {
@@ -226,15 +281,15 @@
       margin-bottom: 6px;
       color: var(--neon-cyan);
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: 1px;
-      text-transform: uppercase;
     }
 
     .meta-value {
       color: var(--text-primary);
-      font-size: 15px;
-      word-break: break-all;
+      font-size: 14px;
+      line-height: 1.6;
+      word-break: break-word;
     }
 
     .forms-wrap {
@@ -242,13 +297,13 @@
       gap: 20px;
     }
 
-    .form-card {
+    .form-panel {
       padding: 28px;
     }
 
     .section-title {
       margin-bottom: 8px;
-      font-size: 20px;
+      font-size: 21px;
       color: var(--text-primary);
     }
 
@@ -266,9 +321,10 @@
     .alert-error,
     .alert-success {
       padding: 14px 18px;
-      margin-bottom: 22px;
-      border-radius: 10px;
+      margin-bottom: 20px;
+      border-radius: 8px;
       font-size: 14px;
+      line-height: 1.6;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -286,15 +342,18 @@
       border: 1px solid rgba(0, 255, 136, 0.3);
     }
 
-    .alert-error svg,
-    .alert-success svg {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
     }
 
     .form-group {
       margin-bottom: 20px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
     }
 
     .form-label {
@@ -302,12 +361,16 @@
       margin-bottom: 10px;
       color: var(--neon-cyan);
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: 1px;
-      text-transform: uppercase;
     }
 
-    .form-input {
+    .required {
+      color: var(--neon-pink);
+    }
+
+    .form-input,
+    .form-textarea {
       width: 100%;
       padding: 12px 14px;
       font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
@@ -317,18 +380,25 @@
       border: 1px solid rgba(0, 240, 255, 0.18);
       border-radius: 8px;
       outline: none;
-      transition: all 0.3s;
+      transition: all 0.2s;
     }
 
-    .form-input:focus {
+    .form-textarea {
+      min-height: 110px;
+      resize: vertical;
+      line-height: 1.7;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
       border-color: var(--neon-cyan);
       box-shadow: var(--glow-cyan);
     }
 
     .form-input[readonly] {
       color: var(--text-muted);
-      cursor: not-allowed;
       background: rgba(255, 255, 255, 0.03);
+      cursor: not-allowed;
     }
 
     .form-hint {
@@ -343,14 +413,14 @@
       width: 100%;
       padding: 14px;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       color: #000;
       background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
       font-size: 15px;
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: 2px;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.2s;
     }
 
     .btn-submit:hover {
@@ -360,41 +430,45 @@
 
     .btn-submit.password {
       background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
-      box-shadow: none;
     }
 
     .btn-submit.password:hover {
       box-shadow: var(--glow-pink);
     }
 
-    @media (max-width: 860px) {
+    @media (max-width: 900px) {
       .profile-grid {
         grid-template-columns: 1fr;
       }
 
-      .info-card {
+      .summary-panel {
         position: static;
       }
     }
 
     @media (max-width: 640px) {
       .navbar {
-        height: auto;
-        padding: 16px;
-        flex-direction: column;
+        padding: 14px 16px;
         align-items: flex-start;
+        flex-direction: column;
       }
 
+      .container {
+        width: min(100% - 32px, 1120px);
+        padding: 28px 0 48px;
+      }
+
+      .setup-banner,
       .page-header {
         flex-direction: column;
         align-items: flex-start;
       }
 
-      .container {
-        padding: 28px 16px 48px;
+      .form-grid {
+        grid-template-columns: 1fr;
       }
 
-      .form-card {
+      .form-panel {
         padding: 22px 18px;
       }
     }
@@ -404,120 +478,161 @@
   <%
     const pageError = typeof error !== 'undefined' ? error : null;
     const pageSuccess = typeof success !== 'undefined' ? success : null;
-    const currentForm = typeof activeForm !== 'undefined' ? activeForm : 'nickname';
+    const currentForm = typeof activeForm !== 'undefined' ? activeForm : 'profile';
+    const setupMode = typeof isSetupMode !== 'undefined' ? isSetupMode : !profile.profileCompleted;
+    const initial = (profile.nickname || 'U').trim().charAt(0).toUpperCase() || 'U';
   %>
+
   <nav class="navbar">
-    <a class="navbar-brand" href="/products">
+    <a class="navbar-brand" href="<%= setupMode ? '/profile' : '/products' %>">
       <span class="brand-icon">二</span>
       <span>校园二手交易</span>
     </a>
     <div class="navbar-user">
       <span><%= user.nickname %></span>
-      <a href="/products" class="nav-link">商品列表</a>
-      <a href="/orders" class="nav-link">我的订单</a>
+      <% if (!setupMode) { %>
+        <a href="/products" class="nav-link">商品列表</a>
+        <a href="/orders" class="nav-link">我的订单</a>
+      <% } %>
       <a href="/profile" class="nav-link active">我的资料</a>
       <a href="/logout" class="nav-link">退出</a>
     </div>
   </nav>
 
   <main class="container">
+    <% if (setupMode) { %>
+      <section class="setup-banner">
+        <div>
+          <strong>首次登录需要先完善资料</strong>
+          <span>补全昵称和常用交易地点后，系统会自动带你进入商品列表。</span>
+        </div>
+        <div class="progress-pill">1 / 1</div>
+      </section>
+    <% } %>
+
     <div class="page-header">
       <div>
-        <h1 class="page-title">我的资料</h1>
-        <p class="page-subtitle">维护昵称和登录密码，修改后会立即同步到当前账号会话。</p>
+        <h1 class="page-title"><%= setupMode ? '完善我的资料' : '我的资料' %></h1>
+        <p class="page-subtitle">
+          <%= setupMode
+            ? '这些信息会帮助买卖双方更快确认身份和线下交易地点。'
+            : '维护你的校园交易身份信息，昵称和常用地点会在交易沟通中提供参考。' %>
+        </p>
       </div>
-      <a href="/products" class="btn-back">返回商品列表</a>
+      <% if (!setupMode) { %>
+        <a href="/products" class="btn-back">返回商品列表</a>
+      <% } %>
     </div>
 
     <div class="profile-grid">
-      <aside class="info-card">
-        <div class="avatar"><%= (profile.nickname || 'U').charAt(0).toUpperCase() %></div>
-        <h2 class="profile-name"><%= profile.nickname || '未设置昵称' %></h2>
-        <p class="page-subtitle">账号资料概览</p>
+      <aside class="panel summary-panel">
+        <div class="avatar"><%= initial %></div>
+        <h2 class="profile-name"><%= profile.nickname || '新用户' %></h2>
+        <span class="profile-status <%= profile.profileCompleted ? '' : 'pending' %>">
+          <%= profile.profileCompleted ? '资料已完善' : '待完善资料' %>
+        </span>
 
-        <div class="profile-meta">
+        <div class="meta-list">
           <div class="meta-item">
             <span class="meta-label">手机号</span>
             <span class="meta-value"><%= profile.phone %></span>
           </div>
           <div class="meta-item">
-            <span class="meta-label">昵称</span>
-            <span class="meta-value"><%= profile.nickname %></span>
+            <span class="meta-label">常用交易地点</span>
+            <span class="meta-value"><%= profile.campus || '待填写' %></span>
           </div>
           <div class="meta-item">
-            <span class="meta-label">账号类型</span>
-            <span class="meta-value">普通用户</span>
+            <span class="meta-label">个人简介</span>
+            <span class="meta-value"><%= profile.bio || '暂未填写' %></span>
           </div>
         </div>
       </aside>
 
       <section class="forms-wrap">
         <% if (pageError) { %>
-          <div class="alert-error">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <span><%= pageError %></span>
-          </div>
+          <div class="alert-error"><span><%= pageError %></span></div>
         <% } %>
 
         <% if (pageSuccess) { %>
-          <div class="alert-success">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <span><%= pageSuccess %></span>
-          </div>
+          <div class="alert-success"><span><%= pageSuccess %></span></div>
         <% } %>
 
-        <article class="form-card">
-          <h2 class="section-title">修改昵称</h2>
-          <p class="section-desc <%= currentForm === 'nickname' ? 'active' : '' %>">更新后，商品列表和订单中的欢迎信息会同步显示新的昵称。</p>
+        <article class="panel form-panel">
+          <h2 class="section-title"><%= setupMode ? '完成基础资料' : '基础资料' %></h2>
+          <p class="section-desc <%= currentForm === 'profile' ? 'active' : '' %>">
+            昵称和常用交易地点为必填项，手机号作为登录账号不可修改。
+          </p>
+
           <form method="POST" action="/profile">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <input type="hidden" name="formType" value="nickname">
+            <input type="hidden" name="formType" value="profile">
 
-            <div class="form-group">
-              <label class="form-label" for="phone">手机号</label>
-              <input id="phone" class="form-input" type="text" value="<%= profile.phone %>" readonly>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="phone">手机号</label>
+                <input id="phone" class="form-input" type="text" value="<%= profile.phone %>" readonly>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="nickname">昵称 <span class="required">*</span></label>
+                <input id="nickname" name="nickname" class="form-input" type="text" maxlength="50" required value="<%= profile.nickname %>">
+                <span class="form-hint">建议使用容易识别的校园昵称。</span>
+              </div>
+
+              <div class="form-group full">
+                <label class="form-label" for="campus">校区 / 学院 / 常用交易地点 <span class="required">*</span></label>
+                <input id="campus" name="campus" class="form-input" type="text" maxlength="100" required
+                       placeholder="例如：东区图书馆门口 / 计算机学院 / 一食堂"
+                       value="<%= profile.campus %>">
+                <span class="form-hint">用于帮助买卖双方约定线下交易位置，最多100个字符。</span>
+              </div>
+
+              <div class="form-group full">
+                <label class="form-label" for="bio">个人简介</label>
+                <textarea id="bio" name="bio" class="form-textarea" maxlength="255"
+                          placeholder="可以简单说明常售物品、交易时间偏好或校内身份。"><%= profile.bio %></textarea>
+                <span class="form-hint">可选，最多255个字符。</span>
+              </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label" for="nickname">昵称</label>
-              <input id="nickname" name="nickname" class="form-input" type="text" maxlength="50" required value="<%= profile.nickname %>">
-              <span class="form-hint">昵称长度不超过50个字符。</span>
-            </div>
-
-            <button class="btn-submit" type="submit">保存昵称</button>
+            <button class="btn-submit" type="submit">
+              <%= setupMode ? '保存并进入平台' : '保存资料' %>
+            </button>
           </form>
         </article>
 
-        <article class="form-card">
-          <h2 class="section-title">修改密码</h2>
-          <p class="section-desc <%= currentForm === 'password' ? 'active' : '' %>">修改密码前需要先验证当前旧密码，新密码长度需在6-18位之间。</p>
-          <form method="POST" action="/profile">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <input type="hidden" name="formType" value="password">
+        <% if (!setupMode) { %>
+          <article class="panel form-panel">
+            <h2 class="section-title">修改密码</h2>
+            <p class="section-desc <%= currentForm === 'password' ? 'active' : '' %>">
+              修改密码前需要验证当前旧密码，新密码长度需在6-18位之间。
+            </p>
 
-            <div class="form-group">
-              <label class="form-label" for="oldPassword">旧密码</label>
-              <input id="oldPassword" name="oldPassword" class="form-input" type="password" minlength="6" maxlength="18" required>
-            </div>
+            <form method="POST" action="/profile">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="formType" value="password">
 
-            <div class="form-group">
-              <label class="form-label" for="newPassword">新密码</label>
-              <input id="newPassword" name="newPassword" class="form-input" type="password" minlength="6" maxlength="18" required>
-            </div>
+              <div class="form-grid">
+                <div class="form-group full">
+                  <label class="form-label" for="oldPassword">旧密码</label>
+                  <input id="oldPassword" name="oldPassword" class="form-input" type="password" minlength="6" maxlength="18" required>
+                </div>
 
-            <div class="form-group">
-              <label class="form-label" for="confirmPassword">确认新密码</label>
-              <input id="confirmPassword" name="confirmPassword" class="form-input" type="password" minlength="6" maxlength="18" required>
-              <span class="form-hint">建议使用与旧密码不同的新密码。</span>
-            </div>
+                <div class="form-group">
+                  <label class="form-label" for="newPassword">新密码</label>
+                  <input id="newPassword" name="newPassword" class="form-input" type="password" minlength="6" maxlength="18" required>
+                </div>
 
-            <button class="btn-submit password" type="submit">更新密码</button>
-          </form>
-        </article>
+                <div class="form-group">
+                  <label class="form-label" for="confirmPassword">确认新密码</label>
+                  <input id="confirmPassword" name="confirmPassword" class="form-input" type="password" minlength="6" maxlength="18" required>
+                </div>
+              </div>
+
+              <button class="btn-submit password" type="submit">更新密码</button>
+            </form>
+          </article>
+        <% } %>
       </section>
     </div>
   </main>

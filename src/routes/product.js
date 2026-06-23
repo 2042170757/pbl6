@@ -8,18 +8,18 @@ const {
   showProductDetail,
   buyProduct
 } = require('../controllers/productController');
-const { requireLogin, requireUser } = require('../middlewares/auth');
+const { requireLogin, requireCompletedProfile } = require('../middlewares/auth');
 const { validateUploadCsrf } = require('../middlewares/csrf');
 const { upload } = require('../middlewares/upload');
 
 const router = express.Router();
 
-router.get('/products', requireLogin, listProducts);
-router.get('/products/publish', requireUser, showPublishForm);
-router.post('/products/publish', requireUser, upload.array('images', 6), validateUploadCsrf, publishProduct);
-router.get('/products/:id/edit', requireUser, showEditProductForm);
-router.post('/products/:id/edit', requireUser, upload.array('images', 6), validateUploadCsrf, updateProduct);
-router.get('/products/:id', requireLogin, showProductDetail);
-router.post('/products/:id/buy', requireUser, buyProduct);
+router.get('/products', requireLogin, requireCompletedProfile, listProducts);
+router.get('/products/publish', requireCompletedProfile, showPublishForm);
+router.post('/products/publish', requireCompletedProfile, upload.array('images', 6), validateUploadCsrf, publishProduct);
+router.get('/products/:id/edit', requireCompletedProfile, showEditProductForm);
+router.post('/products/:id/edit', requireCompletedProfile, upload.array('images', 6), validateUploadCsrf, updateProduct);
+router.get('/products/:id', requireLogin, requireCompletedProfile, showProductDetail);
+router.post('/products/:id/buy', requireCompletedProfile, buyProduct);
 
 module.exports = router;
