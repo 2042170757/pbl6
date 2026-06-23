@@ -93,16 +93,14 @@ async function listProducts(req, res) {
     const totalPages = Math.max(Math.ceil(totalItems / pageSize), 1);
     const currentPage = Math.min(page, totalPages);
     const offset = (currentPage - 1) * pageSize;
-    const queryParams = [...filterParams, pageSize, offset];
-
     const [products] = await pool.execute(
       `SELECT products.*, users.nickname
        FROM products
        JOIN users ON products.user_id = users.id
        WHERE ${where}
        ORDER BY ${orderBy}
-       LIMIT ? OFFSET ?`,
-      queryParams
+       LIMIT ${pageSize} OFFSET ${offset}`,
+      filterParams
     );
 
     const normalizedProducts = products.map(product => ({
