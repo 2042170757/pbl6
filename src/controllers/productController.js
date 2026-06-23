@@ -73,7 +73,7 @@ async function listProducts(req, res) {
     };
     const orderBy = sortMap[sort] || sortMap.latest;
     const filterParams = [];
-    let where = "products.status = 'available'";
+    let where = "products.status = 'available' AND users.deleted_at IS NULL";
 
     if (keyword) {
       where += " AND (products.title LIKE ? OR products.description LIKE ? OR users.nickname LIKE ?)";
@@ -191,7 +191,7 @@ async function showProductDetail(req, res) {
       `SELECT products.*, users.nickname, users.phone
        FROM products
        JOIN users ON products.user_id = users.id
-       WHERE products.id = ? AND products.status <> 'deleted'`,
+       WHERE products.id = ? AND products.status <> 'deleted' AND users.deleted_at IS NULL`,
       [req.params.id]
     );
 

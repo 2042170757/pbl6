@@ -65,6 +65,7 @@
 <body class="admin-page">
   <%
     const pageSuccess = typeof success !== 'undefined' ? success : null;
+    const pageError = typeof error !== 'undefined' ? error : null;
     const productList = Array.isArray(products) ? products : [];
     const dateTimeFormatter = typeof formatDateTime === 'function'
       ? formatDateTime
@@ -116,6 +117,15 @@
         </div>
         <% } %>
 
+        <% if (pageError) { %>
+        <div class="alert-error">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span><%= pageError %></span>
+        </div>
+        <% } %>
+
         <div class="data-table-wrap">
           <% if (productList.length === 0) { %>
           <div class="empty-state">
@@ -156,9 +166,9 @@
                 <td><%= dateTimeFormatter(p.created_at) %></td>
                 <td>
                   <% if (p.status !== 'deleted') { %>
-                  <form action="/admin/products/delete/<%= p.id %>" method="POST" style="display: inline;" onsubmit="return confirm('确定强制下架该商品？');">
+                  <form action="/admin/products/delete/<%= p.id %>" method="POST" style="display: inline;" onsubmit="return confirm('确定将该商品移入回收站吗？');">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <button type="submit" class="btn-delete">强制下架</button>
+                    <button type="submit" class="btn-delete">移入回收站</button>
                   </form>
                   <% } else { %>
                   <span style="color:var(--text-muted);font-size:12px;">—</span>

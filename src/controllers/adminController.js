@@ -1,16 +1,32 @@
 const { getPool } = require('../services/databaseService');
+const {
+  softDeleteUser,
+  restoreUser,
+  permanentlyDeleteUser,
+  softDeleteProduct,
+  restoreProduct,
+  permanentlyDeleteProduct,
+  listRecycleBin
+} = require('../services/recycleBinService');
 
 async function dashboard(req, res) {
   try {
     const pool = getPool();
-    const [userStats] = await pool.execute("SELECT COUNT(*) as count FROM users WHERE role = 'user'");
+    const [userStats] = await pool.execute("SELECT COUNT(*) as count FROM users WHERE role = 'user' AND deleted_at IS NULL");
     const [productStats] = await pool.execute("SELECT COUNT(*) as count FROM products WHERE status = 'available'");
     const [orderStats] = await pool.execute("SELECT COUNT(*) as count FROM orders WHERE status = 'confirmed'");
+    const [recycleStats] = await pool.execute(`
+      SELECT
+        (SELECT COUNT(*) FROM users WHERE role = 'user' AND deleted_at IS NOT NULL) AS userCount,
+        (SELECT COUNT(*) FROM products WHERE status = 'deleted') AS productCount
+    `);
 
     const stats = {
       userCount: userStats[0].count,
       productCount: productStats[0].count,
-      orderCount: orderStats[0].count
+      orderCount: orderStats[0].count,
+      recycleUserCount: recycleStats[0].userCount,
+      recycleProductCount: recycleStats[0].productCount
     };
 
     return res.render('admin/index', { user: req.session.user, stats });
@@ -18,7 +34,7 @@ async function dashboard(req, res) {
     console.error(err);
     return res.render('admin/index', {
       user: req.session.user,
-      stats: { userCount: 0, productCount: 0, orderCount: 0 }
+      stats: { userCount: 0, productCount: 0, orderCount: 0, recycleUserCount: 0, recycleProductCount: 0 }
     });
   }
 }
@@ -27,7 +43,7 @@ async function listUsers(req, res) {
   try {
     const pool = getPool();
     const [users] = await pool.execute(
-      "SELECT id, phone, nickname, role, created_at FROM users WHERE role = 'user' ORDER BY created_at DESC"
+      "SELECT id, phone, nickname, role, created_at FROM users WHERE role = 'user' AND deleted_at IS NULL ORDER BY created_at DESC"
     );
 
     return res.render('admin/users', {
@@ -49,50 +65,18 @@ async function listUsers(req, res) {
 
 async function deleteUser(req, res) {
   try {
-    const pool = getPool();
     const userId = Number(req.params.id);
 
     if (!Number.isInteger(userId) || userId <= 0) {
       return res.redirect(`/admin/users?error=${encodeURIComponent('用户ID无效')}`);
     }
 
-    const [[userRow]] = await pool.execute(
-      "SELECT id FROM users WHERE id = ? AND role = 'user'",
-      [userId]
-    );
-
-    if (!userRow) {
+    const result = await softDeleteUser(userId);
+    if (!result.ok) {
       return res.redirect(`/admin/users?error=${encodeURIComponent('用户不存在或不可删除')}`);
     }
 
-    const [[productStats]] = await pool.execute(
-      `SELECT COUNT(*) AS total
-       FROM products
-       WHERE user_id = ? AND status <> 'deleted'`,
-      [userId]
-    );
-
-    if (productStats.total > 0) {
-      return res.redirect(
-        `/admin/users?error=${encodeURIComponent('该用户仍有关联商品，请先处理商品后再删除')}`
-      );
-    }
-
-    const [[orderStats]] = await pool.execute(
-      `SELECT COUNT(*) AS total
-       FROM orders
-       WHERE buyer_id = ? OR seller_id = ?`,
-      [userId, userId]
-    );
-
-    if (orderStats.total > 0) {
-      return res.redirect(
-        `/admin/users?error=${encodeURIComponent('该用户仍有关联订单，请先处理订单后再删除')}`
-      );
-    }
-
-    await pool.execute("DELETE FROM users WHERE id = ? AND role = 'user'", [userId]);
-    return res.redirect(`/admin/users?success=${encodeURIComponent('用户删除成功')}`);
+    return res.redirect(`/admin/users?success=${encodeURIComponent('用户已移入回收站，手机号可重新注册')}`);
   } catch (err) {
     console.error(err);
     return res.redirect(`/admin/users?error=${encodeURIComponent('删除用户失败，请稍后重试')}`);
@@ -103,12 +87,18 @@ async function listProducts(req, res) {
   try {
     const pool = getPool();
     const [products] = await pool.execute(
-      'SELECT products.*, users.nickname FROM products JOIN users ON products.user_id = users.id ORDER BY products.created_at DESC'
+      `SELECT products.*, users.nickname
+       FROM products
+       JOIN users ON products.user_id = users.id
+       WHERE products.status <> 'deleted'
+         AND users.deleted_at IS NULL
+       ORDER BY products.created_at DESC`
     );
 
     return res.render('admin/products', {
       user: req.session.user,
       products,
+      error: req.query.error || null,
       success: req.query.success || null
     });
   } catch (err) {
@@ -116,6 +106,7 @@ async function listProducts(req, res) {
     return res.render('admin/products', {
       user: req.session.user,
       products: [],
+      error: '商品列表加载失败',
       success: null
     });
   }
@@ -123,12 +114,131 @@ async function listProducts(req, res) {
 
 async function deleteProduct(req, res) {
   try {
-    const pool = getPool();
-    await pool.execute("UPDATE products SET status = 'deleted' WHERE id = ?", [req.params.id]);
-    return res.redirect(`/admin/products?success=${encodeURIComponent('商品下架成功')}`);
+    const productId = Number(req.params.id);
+
+    if (!Number.isInteger(productId) || productId <= 0) {
+      return res.redirect(`/admin/products?error=${encodeURIComponent('商品ID无效')}`);
+    }
+
+    const result = await softDeleteProduct(productId);
+    if (!result.ok) {
+      return res.redirect(`/admin/products?error=${encodeURIComponent('商品不存在或已在回收站')}`);
+    }
+
+    return res.redirect(`/admin/products?success=${encodeURIComponent('商品已移入回收站')}`);
   } catch (err) {
     console.error(err);
     return res.redirect('/admin/products');
+  }
+}
+
+async function recycleBin(req, res) {
+  try {
+    const { users, products } = await listRecycleBin();
+
+    return res.render('admin/recycle-bin', {
+      user: req.session.user,
+      deletedUsers: users,
+      deletedProducts: products,
+      error: req.query.error || null,
+      success: req.query.success || null
+    });
+  } catch (err) {
+    console.error(err);
+    return res.render('admin/recycle-bin', {
+      user: req.session.user,
+      deletedUsers: [],
+      deletedProducts: [],
+      error: '回收站加载失败',
+      success: null
+    });
+  }
+}
+
+async function restoreDeletedUser(req, res) {
+  try {
+    const userId = Number(req.params.id);
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.redirect(`/admin/recycle-bin?error=${encodeURIComponent('用户ID无效')}`);
+    }
+
+    const result = await restoreUser(userId);
+    if (result.ok) {
+      return res.redirect(`/admin/recycle-bin?success=${encodeURIComponent('用户已恢复，可使用原手机号登录')}`);
+    }
+
+    const messageMap = {
+      phone_conflict: '原手机号已被重新注册，请先处理冲突账号后再恢复',
+      missing_phone: '该用户缺少原手机号记录，无法恢复',
+      not_found: '用户不存在或不在回收站'
+    };
+
+    return res.redirect(`/admin/recycle-bin?error=${encodeURIComponent(messageMap[result.reason] || '用户恢复失败')}`);
+  } catch (err) {
+    console.error(err);
+    return res.redirect(`/admin/recycle-bin?error=${encodeURIComponent('用户恢复失败，请稍后重试')}`);
+  }
+}
+
+async function purgeDeletedUser(req, res) {
+  try {
+    const userId = Number(req.params.id);
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.redirect(`/admin/recycle-bin?error=${encodeURIComponent('用户ID无效')}`);
+    }
+
+    const result = await permanentlyDeleteUser(userId);
+    if (!result.ok) {
+      return res.redirect(`/admin/recycle-bin?error=${encodeURIComponent('用户不存在或不在回收站')}`);
+    }
+
+    return res.redirect(`/admin/recycle-bin?success=${encodeURIComponent('用户已彻底删除，相关商品和订单已清理')}`);
+  } catch (err) {
+    console.error(err);
+    return res.redirect(`/admin/recycle-bin?error=${encodeURIComponent('彻底删除用户失败，请稍后重试')}`);
+  }
+}
+
+async function restoreDeletedProduct(req, res) {
+  try {
+    const productId = Number(req.params.id);
+    if (!Number.isInteger(productId) || productId <= 0) {
+      return res.redirect(`/admin/recycle-bin?error=${encodeURIComponent('商品ID无效')}`);
+    }
+
+    const result = await restoreProduct(productId);
+    if (result.ok) {
+      return res.redirect(`/admin/recycle-bin?success=${encodeURIComponent('商品已恢复')}`);
+    }
+
+    const messageMap = {
+      owner_deleted: '卖家仍在用户回收站，请先恢复卖家后再恢复商品',
+      not_found: '商品不存在或不在回收站'
+    };
+
+    return res.redirect(`/admin/recycle-bin?error=${encodeURIComponent(messageMap[result.reason] || '商品恢复失败')}`);
+  } catch (err) {
+    console.error(err);
+    return res.redirect(`/admin/recycle-bin?error=${encodeURIComponent('商品恢复失败，请稍后重试')}`);
+  }
+}
+
+async function purgeDeletedProduct(req, res) {
+  try {
+    const productId = Number(req.params.id);
+    if (!Number.isInteger(productId) || productId <= 0) {
+      return res.redirect(`/admin/recycle-bin?error=${encodeURIComponent('商品ID无效')}`);
+    }
+
+    const result = await permanentlyDeleteProduct(productId);
+    if (!result.ok) {
+      return res.redirect(`/admin/recycle-bin?error=${encodeURIComponent('商品不存在或不在回收站')}`);
+    }
+
+    return res.redirect(`/admin/recycle-bin?success=${encodeURIComponent('商品已彻底删除，相关订单已清理')}`);
+  } catch (err) {
+    console.error(err);
+    return res.redirect(`/admin/recycle-bin?error=${encodeURIComponent('彻底删除商品失败，请稍后重试')}`);
   }
 }
 
@@ -178,5 +288,10 @@ module.exports = {
   deleteUser,
   listProducts,
   deleteProduct,
+  recycleBin,
+  restoreDeletedUser,
+  purgeDeletedUser,
+  restoreDeletedProduct,
+  purgeDeletedProduct,
   listOrders
 };

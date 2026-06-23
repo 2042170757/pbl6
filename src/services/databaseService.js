@@ -59,7 +59,7 @@ async function ensureAdminUser() {
   }
 
   const [admins] = await pool.execute(
-    'SELECT id FROM users WHERE phone = ?',
+    'SELECT id FROM users WHERE phone = ? AND deleted_at IS NULL',
     [ADMIN_PHONE]
   );
 
@@ -97,6 +97,8 @@ async function initDatabase() {
       bio VARCHAR(255) DEFAULT '',
       profile_completed TINYINT(1) NOT NULL DEFAULT 1,
       role ENUM('user', 'admin') DEFAULT 'user',
+      deleted_phone VARCHAR(11) DEFAULT NULL,
+      deleted_at DATETIME DEFAULT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
@@ -110,6 +112,8 @@ async function initDatabase() {
       description TEXT,
       price DECIMAL(10, 2) NOT NULL,
       status ENUM('available', 'sold', 'deleted') DEFAULT 'available',
+      deleted_from_status VARCHAR(20) DEFAULT NULL,
+      deleted_at DATETIME DEFAULT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       INDEX idx_products_status_created (status, created_at),
@@ -157,12 +161,23 @@ async function initDatabase() {
   await ensureColumn('users', 'campus', "VARCHAR(100) DEFAULT ''");
   await ensureColumn('users', 'bio', "VARCHAR(255) DEFAULT ''");
   await ensureColumn('users', 'profile_completed', 'TINYINT(1) NOT NULL DEFAULT 1');
+  await ensureColumn('users', 'deleted_phone', 'VARCHAR(11) DEFAULT NULL');
+  await ensureColumn('users', 'deleted_at', 'DATETIME DEFAULT NULL');
+  await ensureColumn('products', 'deleted_from_status', 'VARCHAR(20) DEFAULT NULL');
+  await ensureColumn('products', 'deleted_at', 'DATETIME DEFAULT NULL');
+  await pool.execute(
+    `UPDATE products
+     SET deleted_at = COALESCE(updated_at, created_at, CURRENT_TIMESTAMP)
+     WHERE status = 'deleted' AND deleted_at IS NULL`
+  );
   await ensureIndex('products', 'idx_products_status_created', ['status', 'created_at'], '(status, created_at)');
   await ensureIndex('products', 'idx_products_user_id', ['user_id'], '(user_id)');
   await ensureIndex('products', 'idx_products_created_at', ['created_at'], '(created_at)');
   await ensureIndex('orders', 'idx_orders_buyer_created', ['buyer_id', 'created_at'], '(buyer_id, created_at)');
   await ensureIndex('orders', 'idx_orders_seller_created', ['seller_id', 'created_at'], '(seller_id, created_at)');
   await ensureIndex('orders', 'idx_orders_status', ['status'], '(status)');
+  await ensureIndex('users', 'idx_users_deleted_at', ['deleted_at'], '(deleted_at)');
+  await ensureIndex('products', 'idx_products_deleted_at', ['deleted_at'], '(deleted_at)');
   await ensureAdminUser();
 }
 

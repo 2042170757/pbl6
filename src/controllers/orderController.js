@@ -11,9 +11,9 @@ async function listOrders(req, res) {
              buyer.nickname AS buyer_nickname,
              seller.nickname AS seller_nickname
       FROM orders
-      JOIN products ON orders.product_id = products.id
-      JOIN users AS buyer ON orders.buyer_id = buyer.id
-      JOIN users AS seller ON orders.seller_id = seller.id
+      LEFT JOIN products ON orders.product_id = products.id
+      LEFT JOIN users AS buyer ON orders.buyer_id = buyer.id
+      LEFT JOIN users AS seller ON orders.seller_id = seller.id
       WHERE orders.buyer_id = ? OR orders.seller_id = ?
       ORDER BY orders.created_at DESC
     `, [req.session.user.id, req.session.user.id]);

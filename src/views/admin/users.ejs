@@ -152,9 +152,9 @@
               <td><%= u.nickname %></td>
               <td><%= dateTimeFormatter(u.created_at) %></td>
               <td>
-                <form action="/admin/users/delete/<%= u.id %>" method="POST" style="display: inline;" onsubmit="return confirm('确定要删除该用户吗？');">
+                <form action="/admin/users/delete/<%= u.id %>" method="POST" style="display: inline;" onsubmit="return confirm('确定将该用户移入回收站吗？手机号将可重新注册。');">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                  <button type="submit" class="btn-delete">删除</button>
+                  <button type="submit" class="btn-delete">移入回收站</button>
                 </form>
               </td>
             </tr>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>回收站 - 校园二手交易平台</title>
+  <link rel="stylesheet" href="/css/common.css">
+  <style>
+    .main-inner { max-width: 1240px; }
+
+    .recycle-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+
+    .summary-card {
+      padding: 20px;
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .summary-card::before {
+      content: '';
+      position: absolute;
+      inset: 0 0 auto;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-pink), transparent);
+    }
+
+    .summary-label {
+      color: var(--text-muted);
+      font-size: 13px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .summary-value {
+      color: var(--neon-cyan);
+      font-size: 32px;
+      font-weight: 700;
+      text-shadow: var(--glow-cyan);
+    }
+
+    .recycle-section {
+      margin-bottom: 34px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      margin-bottom: 0;
+    }
+
+    .section-note {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .phone-cell {
+      font-family: Consolas, monospace;
+      color: var(--neon-purple);
+    }
+
+    .status-deleted {
+      color: var(--neon-pink);
+      border: 1px solid rgba(255, 0, 170, 0.35);
+      background: rgba(255, 0, 170, 0.12);
+    }
+
+    .status-owner-deleted {
+      color: var(--neon-yellow);
+      border: 1px solid rgba(255, 215, 0, 0.35);
+      background: rgba(255, 215, 0, 0.1);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .btn-action {
+      padding: 7px 12px;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      letter-spacing: 1px;
+      background: transparent;
+    }
+
+    .btn-restore {
+      color: var(--neon-cyan);
+      border: 1px solid rgba(0, 240, 255, 0.45);
+    }
+
+    .btn-restore:hover {
+      background: rgba(0, 240, 255, 0.1);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .btn-purge {
+      color: var(--neon-pink);
+      border: 1px solid rgba(255, 0, 170, 0.45);
+    }
+
+    .btn-purge:hover {
+      background: rgba(255, 0, 170, 0.12);
+      box-shadow: var(--glow-pink);
+    }
+  </style>
+</head>
+<body class="admin-page">
+  <%
+    const pageError = typeof error !== 'undefined' ? error : null;
+    const pageSuccess = typeof success !== 'undefined' ? success : null;
+    const userItems = Array.isArray(deletedUsers) ? deletedUsers : [];
+    const productItems = Array.isArray(deletedProducts) ? deletedProducts : [];
+    const dateTimeFormatter = typeof formatDateTime === 'function'
+      ? formatDateTime
+      : function(value) {
+          if (!value) return '-';
+          const date = value instanceof Date ? value : new Date(value);
+          return Number.isNaN(date.getTime()) ? '-' : date.toLocaleString('zh-CN', { hour12: false });
+        };
+  %>
+  <nav class="navbar">
+    <a class="navbar-brand" href="/admin">
+      <div class="brand-icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+        </svg>
+      </div>
+      <span class="brand-text">校园二手交易</span>
+    </a>
+    <div class="navbar-user">
+      <span class="user-name">Admin: <span><%= user.nickname %></span></span>
+      <a href="/logout" class="btn-logout">退出</a>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <%- include('partials/sidebar', { activePage: 'recycle-bin' }) %>
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">回收站</h1>
+            <p class="page-subtitle">用户与商品删除后先进入回收站，可恢复或彻底删除</p>
+          </div>
+          <a href="/admin" class="btn-back">返回首页</a>
+        </div>
+
+        <% if (pageError) { %>
+        <div class="alert-error">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span><%= pageError %></span>
+        </div>
+        <% } %>
+
+        <% if (pageSuccess) { %>
+        <div class="alert-success">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span><%= pageSuccess %></span>
+        </div>
+        <% } %>
+
+        <div class="recycle-summary">
+          <div class="summary-card">
+            <div class="summary-label">用户回收站</div>
+            <div class="summary-value"><%= userItems.length %></div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">商品回收站</div>
+            <div class="summary-value"><%= productItems.length %></div>
+          </div>
+        </div>
+
+        <section class="recycle-section">
+          <div class="section-head">
+            <h2 class="section-title">用户回收站</h2>
+            <p class="section-note">恢复用户会尝试还原原手机号；如果手机号已被重新注册，会提示冲突。</p>
+          </div>
+          <div class="data-table-wrap">
+            <% if (userItems.length === 0) { %>
+            <div class="empty-state">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5 9 6.343 9 8s1.343 3 3 3zm0 2c-3.314 0-6 1.79-6 4v1h12v-1c0-2.21-2.686-4-6-4z"></path>
+              </svg>
+              <p>用户回收站为空</p>
+            </div>
+            <% } else { %>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>原手机号</th>
+                  <th>昵称</th>
+                  <th>注册时间</th>
+                  <th>删除时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% userItems.forEach(function(item) { %>
+                <tr>
+                  <td><%= item.id %></td>
+                  <td class="phone-cell"><%= item.phone || '-' %></td>
+                  <td><%= item.nickname || '-' %></td>
+                  <td><%= dateTimeFormatter(item.created_at) %></td>
+                  <td><%= dateTimeFormatter(item.deleted_at) %></td>
+                  <td>
+                    <div class="actions">
+                      <form action="/admin/recycle-bin/users/<%= item.id %>/restore" method="POST" onsubmit="return confirm('确定恢复该用户吗？');">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button class="btn-action btn-restore" type="submit">恢复</button>
+                      </form>
+                      <form action="/admin/recycle-bin/users/<%= item.id %>/purge" method="POST" onsubmit="return confirm('彻底删除用户会同步清理相关商品和订单，无法恢复，确定继续？');">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button class="btn-action btn-purge" type="submit">彻底删除</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+            <% } %>
+          </div>
+        </section>
+
+        <section class="recycle-section">
+          <div class="section-head">
+            <h2 class="section-title">商品回收站</h2>
+            <p class="section-note">卖家仍在用户回收站时，需要先恢复卖家后才能恢复商品。</p>
+          </div>
+          <div class="data-table-wrap">
+            <% if (productItems.length === 0) { %>
+            <div class="empty-state">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+              </svg>
+              <p>商品回收站为空</p>
+            </div>
+            <% } else { %>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>商品标题</th>
+                  <th>卖家</th>
+                  <th>价格</th>
+                  <th>状态</th>
+                  <th>删除时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% productItems.forEach(function(item) { %>
+                <tr>
+                  <td><%= item.id %></td>
+                  <td><%= item.title %></td>
+                  <td><%= item.nickname || '未知' %> / <span class="phone-cell"><%= item.seller_phone || '-' %></span></td>
+                  <td><span class="price-tag">¥<%= parseFloat(item.price).toFixed(2) %></span></td>
+                  <td>
+                    <% if (item.seller_deleted_at) { %>
+                    <span class="status-badge status-owner-deleted">卖家已删除</span>
+                    <% } else { %>
+                    <span class="status-badge status-deleted">已删除</span>
+                    <% } %>
+                  </td>
+                  <td><%= dateTimeFormatter(item.deleted_at) %></td>
+                  <td>
+                    <div class="actions">
+                      <form action="/admin/recycle-bin/products/<%= item.id %>/restore" method="POST" onsubmit="return confirm('确定恢复该商品吗？');">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button class="btn-action btn-restore" type="submit">恢复</button>
+                      </form>
+                      <form action="/admin/recycle-bin/products/<%= item.id %>/purge" method="POST" onsubmit="return confirm('彻底删除商品会同步清理相关订单，无法恢复，确定继续？');">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button class="btn-action btn-purge" type="submit">彻底删除</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+            <% } %>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

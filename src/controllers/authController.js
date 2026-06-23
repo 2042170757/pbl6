@@ -12,7 +12,7 @@ const {
 async function findUserById(userId) {
   const pool = getPool();
   const [users] = await pool.execute(
-    'SELECT id, phone, password, nickname, campus, bio, profile_completed, role FROM users WHERE id = ? LIMIT 1',
+    'SELECT id, phone, password, nickname, campus, bio, profile_completed, role FROM users WHERE id = ? AND deleted_at IS NULL LIMIT 1',
     [userId]
   );
 
@@ -93,7 +93,7 @@ async function register(req, res) {
     }
 
     const [existing] = await pool.execute(
-      'SELECT id FROM users WHERE phone = ?',
+      'SELECT id FROM users WHERE phone = ? AND deleted_at IS NULL',
       [phone]
     );
 
@@ -142,7 +142,7 @@ async function login(req, res) {
     }
 
     const [users] = await pool.execute(
-      'SELECT * FROM users WHERE phone = ?',
+      'SELECT * FROM users WHERE phone = ? AND deleted_at IS NULL',
       [phone]
     );
 
