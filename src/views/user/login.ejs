@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>登录 - 校园二手交易平台</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/css/common.css">
   <style>
     .auth-page {
@@ -20,6 +21,7 @@
       --auth-icon-shadow-end: var(--glow-pink);
     }
   </style>
+  <link rel="stylesheet" href="/css/campus-glass.css">
 </head>
 <body class="auth-page">
   <%
@@ -42,8 +44,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
           </svg>
         </div>
-        <h1 class="auth-title">LOGIN</h1>
-        <p class="auth-subtitle">校园二手交易平台</p>
+        <h1 class="auth-title">欢迎回到校园集市</h1>
+        <p class="auth-subtitle">把闲置好物交给新的同学</p>
       </div>
 
       <% if (pageError) { %>
@@ -67,15 +69,15 @@
       <form id="loginForm" method="POST" action="/login">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="form-group">
-          <label class="form-label" for="phone">Phone Number</label>
+          <label class="form-label" for="phone">手机号</label>
           <input type="tel" class="form-input" id="phone" name="phone"
-                 placeholder="请输入手机号" value="<%= pagePhone %>" required>
+                 placeholder="请输入手机号" value="<%= pagePhone %>" autocomplete="tel" required>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="password">Password</label>
+          <label class="form-label" for="password">密码</label>
           <input type="password" class="form-input" id="password" name="password"
-                 placeholder="请输入密码" required>
+                 placeholder="请输入密码" autocomplete="current-password" required>
         </div>
 
         <div class="checkbox-group">
@@ -83,7 +85,7 @@
           <label for="remember">记住账号</label>
         </div>
 
-        <button type="submit" class="btn-primary">登 录</button>
+        <button type="submit" class="btn-primary">登录</button>
       </form>
 
       <div class="auth-footer">

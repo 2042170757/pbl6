@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>注册 - 校园二手交易平台</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/css/common.css">
   <style>
     .auth-page {
@@ -24,6 +25,7 @@
       margin-top: 8px;
     }
   </style>
+  <link rel="stylesheet" href="/css/campus-glass.css">
 </head>
 <body class="auth-page">
   <%
@@ -44,8 +46,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
           </svg>
         </div>
-        <h1 class="auth-title">REGISTER</h1>
-        <p class="auth-subtitle">加入校园二手交易平台</p>
+        <h1 class="auth-title">加入校园集市</h1>
+        <p class="auth-subtitle">和同学一起循环闲置好物</p>
       </div>
 
       <% if (pageError) { %>
@@ -60,26 +62,26 @@
       <form id="registerForm" method="POST" action="/register">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="form-group">
-          <label class="form-label" for="phone">Phone Number</label>
+          <label class="form-label" for="phone">手机号</label>
           <input type="tel" class="form-input" id="phone" name="phone"
-                 placeholder="请输入手机号" maxlength="11" required>
+                 placeholder="请输入手机号" maxlength="11" autocomplete="tel" required>
           <span class="form-hint">请输入11位手机号</span>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="password">Password</label>
+          <label class="form-label" for="password">密码</label>
           <input type="password" class="form-input" id="password" name="password"
-                 placeholder="请输入密码" minlength="6" required>
+                 placeholder="请输入密码" minlength="6" autocomplete="new-password" required>
           <span class="form-hint">密码长度6-18位</span>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="confirmPassword">Confirm Password</label>
+          <label class="form-label" for="confirmPassword">确认密码</label>
           <input type="password" class="form-input" id="confirmPassword" name="confirmPassword"
-                 placeholder="请再次输入密码" required>
+                 placeholder="请再次输入密码" autocomplete="new-password" required>
         </div>
 
-        <button type="submit" class="btn-primary">注 册</button>
+        <button type="submit" class="btn-primary">注册</button>
       </form>
 
       <div class="auth-footer">
